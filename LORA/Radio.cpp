@@ -24,7 +24,7 @@ RADIO::RADIO()
  */
 float RADIO::getRadioAltitude(uint8_t buf)
 {
-	return 100; //(Data.Parse(buf,1));
+	return 10000; //(Data.Parse(buf,1));
 }
 
 
@@ -33,7 +33,7 @@ float RADIO::getRadioAltitude(uint8_t buf)
  */
 float RADIO::getCommandReceived(uint8_t buf)
 {
-	return (Data.Parse(buf,9));
+	return 0; //(Data.Parse(buf,9));
 }
 
 
@@ -42,7 +42,7 @@ float RADIO::getCommandReceived(uint8_t buf)
  */
 float RADIO::getCommandSent(uint8_t buf)
 {
-	return (Data.Parse(buf,8));
+	return 1; //(Data.Parse(buf,8));
 }
 
 
@@ -60,7 +60,7 @@ float RADIO::getCraftID(uint8_t buf)
  */
 float RADIO::getRadioLatitude(uint8_t buf)
 {
-	return (Data.Parse(buf,2));
+	return 42.02658; //(Data.Parse(buf,2));
 }
 
 
@@ -69,7 +69,7 @@ float RADIO::getRadioLatitude(uint8_t buf)
  */
 float RADIO::getRadioLongitude(uint8_t buf)
 {
-	return (Data.Parse(buf,3));
+	return -93.65354; //(Data.Parse(buf,3));
 }
 
 
@@ -78,7 +78,7 @@ float RADIO::getRadioLongitude(uint8_t buf)
  */
 float RADIO::getLoRaEvent(uint8_t buf)
 {
-	return (Data.Parse(buf,4));
+	return 0; //(Data.Parse(buf,4));
 }
 
 
@@ -87,7 +87,7 @@ float RADIO::getLoRaEvent(uint8_t buf)
  */
 float RADIO::getReleaseStatus(uint8_t buf)
 {
-	return (Data.Parse(buf,6));
+	return 1; //(Data.Parse(buf,6));
 }
 
 
@@ -99,7 +99,7 @@ float RADIO::getReleaseStatus(uint8_t buf)
  */
 float RADIO::getTimeStamp(uint8_t buf, int selector)
 {
-	return (Data.Parse(buf, selector));
+	return 100; //(Data.Parse(buf, selector));
 }
 
 
@@ -211,7 +211,6 @@ void RADIO::manager()
  */
 void RADIO::radioReceive()
 {
-  
 	//Creates a temporary varaible to read in the incoming transmission. 
 	uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
 	
