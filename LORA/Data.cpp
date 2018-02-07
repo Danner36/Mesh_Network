@@ -5,7 +5,7 @@
 
 #include <Arduino.h>
 #include "Data.h"
-#include "GPS.h"
+//#include "GPS.h"
 #include <stdlib.h>
 #include "Globals.h"
 

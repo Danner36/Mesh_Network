@@ -4,24 +4,24 @@
 
 #include "Globals.h"
 #include "DATA.h"
-#include "GPS.h"
-#include "I2C.h"
+//#include "GPS.h"
+//#include "I2C.h"
 #include "RADIO.h"
-#include "SAVE.h"
+//#include "SAVE.h"
 
 
 /*****CONSTRUCTORS*****/ //(Objects that can reference their respective functions & variables)
 DATA Data;
-GPS Gps;
-I2C Comm;
+//GPS Gps;
+//I2C Comm;
 RADIO Radio;
-SAVE Save;
+//SAVE Save;
 
 //Directs the radio object to focus on two specific ports.
 RH_RF95 rf95(8,7);
 
 //Creates an instance of the gps class from TinyGPSPlus.
-TinyGPSPlus gps;
+//TinyGPSPlus gps;
 
 
 /**
@@ -37,7 +37,7 @@ void setup(){
   //Save.initialize();
 
   //Initializes the Inter-Intergrated Circuit (I^2C) protocol.
-  Comm.initialize();
+  //Comm.initialize();
 
   //Initializes the Radio.
   Radio.initialize();
@@ -51,11 +51,11 @@ void setup(){
 void loop(){
   
   //Reads in a new NMEA sentence.
-  Gps.manager();
+  //Gps.manager();
 
   //Communicates with the Mega to check for certain events happening
   //   throughout the system.
-  Comm.manager();
+  //Comm.manager();
 
   //Responsible for grabbing all of the craft's current information, 
   //   turning that data into an array that can be sent out via radio.
@@ -68,5 +68,5 @@ void loop(){
   //Saves all local data to the SD card.
   //Save.saveData();
 
-  delay(10000);
+  delay(1000);
 }
