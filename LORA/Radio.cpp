@@ -3,9 +3,10 @@
  *    development micro controller.
  */
 
+
 #include <Arduino.h>
-#include "RADIO.h"
-#include "DATA.h"
+#include "Radio.h"
+#include "Data.h"
 #include <RH_RF95.h>
 #include "Globals.h"
 
@@ -24,7 +25,7 @@ RADIO::RADIO()
  */
 float RADIO::getRadioAltitude(uint8_t buf)
 {
-	return 10000; //(Data.Parse(buf,1));
+	return (Data.Parse(buf,1));
 }
 
 
@@ -33,7 +34,7 @@ float RADIO::getRadioAltitude(uint8_t buf)
  */
 float RADIO::getCommandReceived(uint8_t buf)
 {
-	return 0; //(Data.Parse(buf,9));
+	return (Data.Parse(buf,9));
 }
 
 
@@ -42,7 +43,7 @@ float RADIO::getCommandReceived(uint8_t buf)
  */
 float RADIO::getCommandSent(uint8_t buf)
 {
-	return 1; //(Data.Parse(buf,8));
+	return (Data.Parse(buf,8));
 }
 
 
@@ -60,7 +61,7 @@ float RADIO::getCraftID(uint8_t buf)
  */
 float RADIO::getRadioLatitude(uint8_t buf)
 {
-	return 42.02658; //(Data.Parse(buf,2));
+	return (Data.Parse(buf,2));
 }
 
 
@@ -69,7 +70,7 @@ float RADIO::getRadioLatitude(uint8_t buf)
  */
 float RADIO::getRadioLongitude(uint8_t buf)
 {
-	return -93.65354; //(Data.Parse(buf,3));
+	return (Data.Parse(buf,3));
 }
 
 
@@ -78,7 +79,7 @@ float RADIO::getRadioLongitude(uint8_t buf)
  */
 float RADIO::getLoRaEvent(uint8_t buf)
 {
-	return 0; //(Data.Parse(buf,4));
+	return (Data.Parse(buf,4));
 }
 
 
@@ -87,7 +88,7 @@ float RADIO::getLoRaEvent(uint8_t buf)
  */
 float RADIO::getReleaseStatus(uint8_t buf)
 {
-	return 1; //(Data.Parse(buf,6));
+	return (Data.Parse(buf,6));
 }
 
 
@@ -99,7 +100,7 @@ float RADIO::getReleaseStatus(uint8_t buf)
  */
 float RADIO::getTimeStamp(uint8_t buf, int selector)
 {
-	return 100; //(Data.Parse(buf, selector));
+	return (Data.Parse(buf, selector));
 }
 
 
@@ -178,16 +179,17 @@ void RADIO::manager()
 		Radio.rollCall();
 		
 	}
+ 
 	//After Roll Call is complete, Mission Control will broadcast the start signal. Appropriate delays are
 	//   distributed below to initally sync the network to a 5 second split. This makes for a 15 second revolution.
 	//   
 	//   MS - starts instantly
-	//   HABET - delays 5 seconds
-	//   EE - delays 10 seconds
+	//   HABET - delays .. seconds  <- NOT CURRENTLY INCLUDED.
+	//   EE - delays 5 seconds
 	else if(Network.Craft_ID == 555.5){
 		
-		//Delays 10 seconds.
-		delay(10000);
+		//Delays 5 seconds.
+		delay(5000);
     
     //Starts the broadcasting timer.
     start = millis();
@@ -211,6 +213,7 @@ void RADIO::manager()
  */
 void RADIO::radioReceive()
 {
+  
 	//Creates a temporary varaible to read in the incoming transmission. 
 	uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
 	
@@ -269,7 +272,7 @@ void RADIO::radioReceive()
 void RADIO::rollCall()
 {
 	//Updates the Craft_ID to Eagle Eye's specific ID #.
-	Network.Craft_ID = 3.0;
+	Network.Craft_ID = 2.0;
 	
 	//Sends the transmission via radio.
 	Radio.broadcast();
@@ -332,10 +335,11 @@ void RADIO::broadcast()
 	rf95.waitPacketSent();
 }
 
+
 /*
  * Blinks LED.
  */
-void RADIO::blinkLED(){
+void blinkLED(){
 
   //ON
   digitalWrite(LED, HIGH);
