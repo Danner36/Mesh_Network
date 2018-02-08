@@ -78,7 +78,18 @@ class RADIO
 	
 	//Status of the craft replying to Mission Control with its node #.
   bool checkedIn = false;
-	
+
+  //Triggered by input from user. When turned true, this broadcasts the start of communication between nodes. 
+  bool sendRollCall = false;
+
+  //Holds the ID of the craft that just broadcasted. THIS IS ANOTHER NODE, NOT MISSION CONTROL. 
+  float receivedID = 0.0;
+
+  //List of nodes currently logged into network. 
+  // MC - 1
+  // EE - 2
+  float nodeList[10] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; 
+
   //Stores all information related to the network of the Eagle Eye program.
 	//   This struct reads specific indexes and than rebroadcasts the updated transmission to
 	//   the other nodes in the network. 

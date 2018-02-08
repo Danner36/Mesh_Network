@@ -170,14 +170,11 @@ void RADIO::manager()
 {
 	//Reads in radio transmission if available.
 	Radio.radioReceive();
-	
-	//Checks for a specific Craft ID. '999.9' signals the start of operation.
-	if(Network.Craft_ID == 999.9 && !Radio.checkedIn){
-		
-		//Responds to Mission Control with the correct ID to signal this node is here and listening.
-		Radio.rollCall();
-		
-	}
+
+  //Broadcasts roll call if start signal is found.
+  if(sendRollCall == true){
+    Radio.rollCall();
+  }
  
 	//After Roll Call is complete, Mission Control will broadcast the start signal. Appropriate delays are
 	//   distributed below to initally sync the network to a 5 second split. This makes for a 15 second revolution.
@@ -205,6 +202,37 @@ void RADIO::manager()
 
 
 /**
+ * Checks for response from node after rollcall broadcast. If not found, adds to network.
+ */
+void RADIO::nodeCheckIn()
+{
+  //Checks for response from node after rollcall broadcast.
+  if(receivedID != 0){
+    while(nodeList
+  }
+}
+
+/**
+ * Responsible for watching serial port for the users start signal. 
+ */
+void RADIO::checkForStart()
+{
+  //Manual trigger of Roll Call Sequence. Will be replaced by a interrupt and keypad. 
+  //Temporary for testing only. 
+  String temp = "";
+
+  //Reads in input and checks for the string "start".
+  while(Serial.available()){
+    temp += Serial.read();
+
+    if(temp == "start"){
+      sendRollCall = true;
+    }
+  }
+}
+
+
+/**
  * Responsible for reading in signals over the radio antenna.
  */
 void RADIO::radioReceieve()
@@ -215,7 +243,7 @@ void RADIO::radioReceieve()
 	//Gets the length of the above temporary varaible.
 	uint8_t len = sizeof(buf);
 	
-	//Reads in the avaiable radio transmission, than checks if it is corrupt or complete.
+	//Reads in the avaiable radio transmission.
 	if(rf95.recv(buf, &len)) {
 
     //Blinks LED.
@@ -225,8 +253,6 @@ void RADIO::radioReceieve()
 		//   to that of the newly received signal. Updates the LoRa's owned variables and copies
 		//   down the other nodes varaibles. If the time LoRa currently holds the most updated values
 		//   for another node (LoRa's time stamp is higher than the new signal's), it replaces those vars.
-		
-		
 		
 		//Reads in the time stamp for HABET's last broadcast.
 		float temp_HABET = Radio.getTimeStamp(buf, 5);
@@ -241,8 +267,6 @@ void RADIO::radioReceieve()
 			
 		}
 		
-		
-		
 		//Reads in the time stamp for Mission Control's last broadcast.
 		float temp_LoRa = Radio.getTimeStamp(buf, 0);
 		
@@ -256,9 +280,10 @@ void RADIO::radioReceieve()
 			Network.Latitude = Radio.getLatitude(buf);
 			Network.Longitude = Radio.getLongitude(buf);
 			Network.LE = Radio.getLoRaEvent(buf);
-			
 		}
-		
+
+    //Reads in Craft ID to see where signal came from. 
+    receivedID = Radio.getCraftID(buf);
 	}
 }
 
@@ -268,14 +293,12 @@ void RADIO::radioReceieve()
  */
 void RADIO::rollCall()
 {
-	//Updates the Craft_ID to Mission Control's specific ID #.
-	Network.Craft_ID = 1.0;
+	//Updates the Craft_ID to the network call in signal "999.9".
+	Network.Craft_ID = 999.9;
 	
 	//Sends the transmission via radio.
 	Radio.broadcast();
-	
-	//Updates Checked_In Status.
-	checkedIn = true;
+  
 }
 
 
