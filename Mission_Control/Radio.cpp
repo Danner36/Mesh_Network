@@ -128,38 +128,34 @@ void RADIO::initialize()
 	
 	
 	//Checks for the creation of the radio object and its physical connection attribute.
-	//If invalid connection, the program will stall and print an error message.
+	//   If invalid connection, the program will stall and print an error message.
 	if(!rf95.init()){
-		
 		Serial.println("LoRa radio init failed");
 		while (1);
 		
 	}
 	//Valid connection, program proceeds as planned.
 	else{
-		
 		Serial.println("LoRa radio init OK!");
-		
 	}
 	
 	//Checks the radio objects set frequency. 
-	//If invalid connection, the program will stall and print an error message.
+	//   If invalid connection, the program will stall and print an error message.
 	if(!rf95.setFrequency(RF95_FREQ)){
-		
+    
 		Serial.println("setFrequency failed");
 		while (1);
-		
 	}
 	//Valid connection, program proceeds as planned.
 	else{
-		
 		Serial.print("Set Freq to: "); Serial.println(RF95_FREQ);
-		
 	}
 	
 	//Sets the max power to be used to in the amplification of the signal being sent out.
 	rf95.setTxPower(23, false);
 	Serial.println();
+
+  attachInterrupt(digitalPinToInterrupt(Radio.interruptPinRollCall), startRollCall, HIGH);
 }
 
 
@@ -171,9 +167,12 @@ void RADIO::manager()
 	//Reads in radio transmission if available.
 	Radio.radioReceive();
 
-  //Broadcasts roll call if start signal is found.
+  //Checks to see if its time for Roll Call. This gets updated in 
   if(sendRollCall == true){
     Radio.rollCall();
+
+    //
+    Radio.nodeCheckIn();
   }
  
 	//After Roll Call is complete, Mission Control will broadcast the start signal. Appropriate delays are
@@ -208,27 +207,28 @@ void RADIO::nodeCheckIn()
 {
   //Checks for response from node after rollcall broadcast.
   if(receivedID != 0){
-    while(nodeList
+
+    //Cycles through nodes that have already checked in.
+    int i = 0;
+    while(i<10){
+
+      //Compares current ID to the nodes that have already checked in. 
+      if(NodeList[i] == 0.0 && NodeList[i] != receivedID){
+
+        //If not found and an empty spot is found, it adds the node to the network. 
+        NodeList[i] = receivedID;
+      }
+    }
   }
 }
 
 /**
  * Responsible for watching serial port for the users start signal. 
  */
-void RADIO::checkForStart()
+void RADIO::startRollCall()
 {
-  //Manual trigger of Roll Call Sequence. Will be replaced by a interrupt and keypad. 
-  //Temporary for testing only. 
-  String temp = "";
-
-  //Reads in input and checks for the string "start".
-  while(Serial.available()){
-    temp += Serial.read();
-
-    if(temp == "start"){
-      sendRollCall = true;
-    }
-  }
+  if(
+  
 }
 
 
@@ -350,7 +350,7 @@ void RADIO::broadcast()
 /*
  * Blinks LED.
  */
-void blinkLED(){
+void RADIO::blinkLED(){
 
   //ON
   digitalWrite(LED, HIGH);

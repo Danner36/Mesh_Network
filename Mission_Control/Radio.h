@@ -58,6 +58,9 @@ class RADIO
 
   //Blinks the LED on the LoRa uC to show a signal has been received.
   void blinkLED();
+
+  //Interrypt method that gets triggered by external pushbutton. 
+  void startRollCall();
 	
 	
 	
@@ -69,27 +72,27 @@ class RADIO
   
   //Reset pin onboard the radio.
   const byte RFM95_RST = 4;
+
+  //Interrupt pin to trigger RollCall.
+  const byte interruptPinRollCall = 3;
   
   //Pins used to blink an LED to signal receival packet.
   const byte LED = 13;
 	
 	//Radio frequency used throught the Eagle Eye Program. CHECK WITH HABET BEFORE EACH FLIGHT!!!!!
 	#define RF95_FREQ 433.0
-	
-	//Status of the craft replying to Mission Control with its node #.
-  bool checkedIn = false;
-
+  
   //Triggered by input from user. When turned true, this broadcasts the start of communication between nodes. 
   bool sendRollCall = false;
-
+  
   //Holds the ID of the craft that just broadcasted. THIS IS ANOTHER NODE, NOT MISSION CONTROL. 
   float receivedID = 0.0;
-
+  
   //List of nodes currently logged into network. 
   // MC - 1
   // EE - 2
   float nodeList[10] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; 
-
+  
   //Stores all information related to the network of the Eagle Eye program.
 	//   This struct reads specific indexes and than rebroadcasts the updated transmission to
 	//   the other nodes in the network. 
