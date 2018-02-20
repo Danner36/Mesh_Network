@@ -17,10 +17,13 @@ class DATA
   //Responsible for pulling current sensor data from peripherals.
   void displayInfo();
 
+  //Prints nodes from Radio.nodeList.
+  void printNodes();
+
   
   
 	//Parses passed in message by using commas as the identifiers.
-	float Parse(char[] message, int objective);
+	float Parse(char message[], int objective);
 
   //false = Direct Line of Commuication to Craft. (Eagle Eye Blimp)
   //   true = Receiving information through another craft. Not direct from Eagle Eye.
@@ -28,9 +31,7 @@ class DATA
   //   THIS WILL NOT BE IMPLEMENTED UNTIL THIRD NODE IS BROUGHT ONLINE. PLACEHOLDER.
   //
   bool flyByWire = false;
-  
-  
-  
+
 };
 
 #endif

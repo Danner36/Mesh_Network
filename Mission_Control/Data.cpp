@@ -5,6 +5,8 @@
 
 #include <Arduino.h>
 #include "Data.h"
+#include "Radio.h"
+#include "keyP.h"
 #include <stdlib.h>
 #include "Globals.h"
 
@@ -110,10 +112,38 @@ void DATA::displayInfo()
   //Local.LE and Local.ME update on their own throughout the program & are reset to 0 after being saved.
 
   //Prints out data struct to the screen for debugging/following along purposes.
-  Serial.println("----------------------------------------------");
-  Serial.println("                  Craft Data                  ");
+  Serial.println("---------------------------------------------------------------------");
+  Serial.println("|                            Craft Data                             |");
+  Serial.println("|                                                                   |");
+  Serial.print(  "|  Network Nodes: "); Data.printNodes();               Serial.println("\t\t\t\t\t    |");
+  Serial.print(  "|  Longitude: "); Serial.print(Key.pressedKey);        Serial.println("\t\t\t\t\t\t\t    |");
+  Serial.println("|                                                                   |");
+  Serial.println("---------------------------------------------------------------------");
+  Serial.println("|                                                                   |");
+  Serial.print(  "|  Lora Time Stamp:  "); Serial.print(Radio.Network.L_TS); Serial.println("\t\t\t\t\t    |");
+  Serial.print(  "|  Altitude:  "); Serial.print(Radio.Network.Altitude);    Serial.println("\t\t\t\t\t\t    |");
+  Serial.print(  "|  Latitude:  "); Serial.print(Radio.Network.Latitude);    Serial.println("\t\t\t\t\t\t    |");
+  Serial.print(  "|  Longitude: "); Serial.print(Radio.Network.Longitude);   Serial.println("\t\t\t\t\t\t    |");
+  Serial.println("|                                                                   |");
+}
 
+
+/**
+ * 
+ */
+void DATA::printNodes(){
   
+  int i = 0;
+
+  while(i<10){
+
+    //Only prints nodes. Not empty elements.
+    if(Radio.nodeList[i] != 0.0){
+      Serial.print(Radio.nodeList[i],0);
+      Serial.print(", ");
+    }
+    i++;
+  }
 }
 
 

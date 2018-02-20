@@ -59,11 +59,11 @@ class RADIO
   //Blinks the LED on the LoRa uC to show a signal has been received.
   void blinkLED();
 
-  //Interrypt method that gets triggered by external pushbutton. 
-  void startRollCall();
+  //Compares current node against others. Prevents duplicates. 
+  void nodeCheckIn();
 	
 	
-	
+  
   //Chip select pin for the radio.
   const byte RFM95_CS = 8;
   
@@ -82,16 +82,17 @@ class RADIO
 	//Radio frequency used throught the Eagle Eye Program. CHECK WITH HABET BEFORE EACH FLIGHT!!!!!
 	#define RF95_FREQ 433.0
   
-  //Triggered by input from user. When turned true, this broadcasts the start of communication between nodes. 
-  bool sendRollCall = false;
-  
   //Holds the ID of the craft that just broadcasted. THIS IS ANOTHER NODE, NOT MISSION CONTROL. 
   float receivedID = 0.0;
+
+  //State of RollCall.
+  enum rollCallStatus {NOTSTARTED, RUNNING, COMPLETE};
+  enum rollCallStatus RCstate = NOTSTARTED;
   
   //List of nodes currently logged into network. 
   // MC - 1
   // EE - 2
-  float nodeList[10] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; 
+  float nodeList[10] = {1.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; 
   
   //Stores all information related to the network of the Eagle Eye program.
 	//   This struct reads specific indexes and than rebroadcasts the updated transmission to
@@ -104,9 +105,9 @@ class RADIO
 		
 		//Each of these is defined in the Data.h struct. Refer to its documentation as needed.
 		float L_TS = 0.0;
-		float Altitude = 0.0;
-		float Latitude = 0.0;
-		float Longitude = 0.0;
+		float Altitude = 25000;
+		float Latitude = 43.23;
+		float Longitude = 93.111;
 		float LE = 0.0;
 		
 		/**
@@ -124,7 +125,7 @@ class RADIO
 		 */
 		
 		//Mission Control's ms Time stamp.
-		float MS_TS = 0.0;
+		float MC_TS = 0.0;
 		
 		//Command_Sent will be what triggers a command on another craft (Eagle Eye). 
 		float Command_Sent = 0.0;
@@ -142,7 +143,8 @@ class RADIO
 		//   for Mission Control to have a sense of if information is being relayed through nodes,
 		//   or if we have a direct line of communication with each node.
 		float Craft_ID = 0.0;
-	}
+	};
+  
 	struct Network_Data Network;
 
   //This timer is used for syncing the mesh network. Every craft as 5 seconds to talk. 

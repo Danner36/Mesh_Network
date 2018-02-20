@@ -6,6 +6,7 @@
 #include <Arduino.h>
 #include "Radio.h"
 #include "Data.h"
+#include "keyP.h"
 #include <RH_RF95.h>
 #include "Globals.h"
 
@@ -154,8 +155,6 @@ void RADIO::initialize()
 	//Sets the max power to be used to in the amplification of the signal being sent out.
 	rf95.setTxPower(23, false);
 	Serial.println();
-
-  attachInterrupt(digitalPinToInterrupt(Radio.interruptPinRollCall), startRollCall, HIGH);
 }
 
 
@@ -168,20 +167,35 @@ void RADIO::manager()
 	Radio.radioReceive();
 
   //Checks to see if its time for Roll Call. This gets updated in 
-  if(sendRollCall == true){
+  if(Key.pressedKey == 9 || RCstate == RUNNING){
+
+    Serial.println("Starting RollCall");
+
+    //Updates RollCallStatus to running. 
+    RCstate = RUNNING;
+
+    //Calls function. 
     Radio.rollCall();
 
-    //
+    //Compares currently checked in node with the network to prevent duplicate nodes.
     Radio.nodeCheckIn();
+
+    if(Key.pressedKey == 8){
+
+      Serial.println("Ending RollCall");
+
+      //Updates RollCallStatus to complete.
+      RCstate = COMPLETE;
+    }
   }
  
 	//After Roll Call is complete, Mission Control will broadcast the start signal. Appropriate delays are
 	//   distributed below to initally sync the network to a 5 second split. This makes for a 15 second revolution.
 	//
-	//   MS - starts instantly
+	//   MC - starts instantly
 	//   HABET - delays 5 seconds
 	//   EE - delays 10 seconds
-	else if(Network.Craft_ID == 555.5){
+	else if(Network.Craft_ID == 555.5 && RCstate == COMPLETE){
 		
 		//Does not delay because MS is the first node to broadcast after rollcall is compelted.
 		//delay(0000);
@@ -189,13 +203,15 @@ void RADIO::manager()
 	}
 	//Each of the 3 crafts have 5 seconds to broadcast. That means each craft will broadcast every 15 seconds.
 	//   15000milliseconds = 15 seconds.
-	else if(millis() - start >= 15000){
+	else if(millis() - start >= 15000 && RCstate == COMPLETE){
 		
 		//Resets the counter. This disabled broadcasting agian until 15 seconds has passed.
 		start = millis();
 		
 		//Sends the transmission via radio.
 		Radio.broadcast();
+    
+    Serial.println("Broadcasting");
 	}
 }
 
@@ -213,29 +229,20 @@ void RADIO::nodeCheckIn()
     while(i<10){
 
       //Compares current ID to the nodes that have already checked in. 
-      if(NodeList[i] == 0.0 && NodeList[i] != receivedID){
+      if(nodeList[i] == 0.0 && nodeList[i] != receivedID){
 
         //If not found and an empty spot is found, it adds the node to the network. 
-        NodeList[i] = receivedID;
+        nodeList[i] = receivedID;
       }
     }
   }
-}
-
-/**
- * Responsible for watching serial port for the users start signal. 
- */
-void RADIO::startRollCall()
-{
-  if(
-  
 }
 
 
 /**
  * Responsible for reading in signals over the radio antenna.
  */
-void RADIO::radioReceieve()
+void RADIO::radioReceive()
 {
 	//Creates a temporary varaible to read in the incoming transmission. 
 	uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
@@ -271,14 +278,14 @@ void RADIO::radioReceieve()
 		float temp_LoRa = Radio.getTimeStamp(buf, 0);
 		
 		//Compares the currently brought in time stamp to the one stored onboad.
-		if(temp_LoRa > L_TS){
+		if(temp_LoRa > Radio.Network.L_TS){
 			
 			//If the incoming signal has more up-to-date versions, we overwrite our saved version with
 			//   the new ones.
 			Network.L_TS = temp_LoRa;
-			Network.Altitude = Radio.getAltitude(buf);
-			Network.Latitude = Radio.getLatitude(buf);
-			Network.Longitude = Radio.getLongitude(buf);
+			Network.Altitude = Radio.getRadioAltitude(buf);
+			Network.Latitude = Radio.getRadioLatitude(buf);
+			Network.Longitude = Radio.getRadioLongitude(buf);
 			Network.LE = Radio.getLoRaEvent(buf);
 		}
 
@@ -309,7 +316,7 @@ void RADIO::broadcast()
 {
   
 	//Updates the time object to hold the most current operation time.
-	Network.MS_TS = millis();
+	Network.MC_TS = millis();
 	
   //Casting all float values to a character array with commas saved in between values
   //   so the character array can be parsed when received by another craft.
