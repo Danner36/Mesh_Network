@@ -6,7 +6,7 @@
 #include <Keypad.h>
 #include "Globals.h"
 #include "keyP.h"
-#include <Keypad.h>
+#include "Radio.h"
 
 
 /**
@@ -21,15 +21,17 @@ KEYPAD::KEYPAD()
 /**
  * Updates "pressedKey" to current input. 
  */
-void KEYPAD::check(char temp)
+void KEYPAD::check(char key)
 {
-  pressedKey = temp;
-
-  //Checks for actual press. 0 means no key has been pressed.
-  if(pressedKey != 0x00){
+  //Resets the inputted key. 
+  pressedKey = ' ';
   
-    Serial.print("Key pressed: ");
-    Serial.println(pressedKey);
+  //Checks for actual press. 0 means no key has been pressed.
+  if(key != 0x00){
+    Radio.blinkLED();
+
+    pressedKey = key;
+    
   }
 }
 

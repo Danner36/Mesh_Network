@@ -113,18 +113,31 @@ void DATA::displayInfo()
 
   //Prints out data struct to the screen for debugging/following along purposes.
   Serial.println("---------------------------------------------------------------------");
+  Serial.println("---------------------------------------------------------------------");
+  Serial.println("---------------------------------------------------------------------");
+  Serial.println("---------------------------------------------------------------------");
   Serial.println("|                            Craft Data                             |");
   Serial.println("|                                                                   |");
-  Serial.print(  "|  Network Nodes: "); Data.printNodes();               Serial.println("\t\t\t\t\t    |");
-  Serial.print(  "|  Longitude: "); Serial.print(Key.pressedKey);        Serial.println("\t\t\t\t\t\t\t    |");
+  Serial.print(  "|  Network Nodes: "); Data.printNodes();               Serial.println("\t\t\t\t\t\t    |");
+  Serial.print(  "|  Keypad Press: "); Serial.print(Key.pressedKey);        Serial.println("\t\t\t\t\t\t    |");
   Serial.println("|                                                                   |");
   Serial.println("---------------------------------------------------------------------");
   Serial.println("|                                                                   |");
-  Serial.print(  "|  Lora Time Stamp:  "); Serial.print(Radio.Network.L_TS); Serial.println("\t\t\t\t\t    |");
-  Serial.print(  "|  Altitude:  "); Serial.print(Radio.Network.Altitude);    Serial.println("\t\t\t\t\t\t    |");
-  Serial.print(  "|  Latitude:  "); Serial.print(Radio.Network.Latitude);    Serial.println("\t\t\t\t\t\t    |");
-  Serial.print(  "|  Longitude: "); Serial.print(Radio.Network.Longitude);   Serial.println("\t\t\t\t\t\t    |");
+  Serial.print(  "|  Lora Time Stamp:  "); Serial.print(Radio.Network.L_TS);   Serial.println("\t\t\t\t\t    |");
+  Serial.print(  "|  Altitude:   "); Serial.print(Radio.Network.Altitude);      Serial.println("\t\t\t\t\t\t    |");
+  Serial.print(  "|  Latitude:   "); Serial.print(Radio.Network.Latitude,6);    Serial.println("\t\t\t\t\t\t    |");
+  Serial.print(  "|  Longitude:  "); Serial.print(Radio.Network.Longitude,6);   Serial.println("\t\t\t\t\t\t    |");
+  Serial.print(  "|  LoRa Event: "); Serial.print(Radio.Network.LE);   Serial.println("\t\t\t\t\t\t    |");
   Serial.println("|                                                                   |");
+  Serial.println("---------------------------------------------------------------------");
+  Serial.println("|                                                                   |");
+  Serial.print(  "|  Mission Control Time Stamp:  "); Serial.print(Radio.Network.L_TS);   Serial.println("\t\t\t\t    |");
+  Serial.print(  "|  Command Sent:  ");       Serial.print(Radio.Network.Altitude);      Serial.println("\t\t\t\t\t\t    |");
+  Serial.print(  "|  Command Received:  ");   Serial.print(Radio.Network.Latitude,6);    Serial.println("\t\t\t\t\t    |");
+  Serial.println("|                                                                   |");
+  Serial.println("---------------------------------------------------------------------");
+  Serial.print(  "|  Craft_ID:  ");     Serial.print(Radio.Network.Craft_ID);    Serial.println("\t\t\t\t\t\t    |");
+  Serial.println("---------------------------------------------------------------------");
 }
 
 

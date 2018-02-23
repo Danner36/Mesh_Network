@@ -20,22 +20,11 @@ KEYPAD Key;
 
 //Directs the radio object to focus on two specific ports.
 RH_RF95 rf95(8,7);
-
-//No idea.
-byte ligne_pin[3] = {5, 6, 9};
-
-//No idea.
-byte colonne_pin[3] = {11, 12, 13};
-
-//Matrix layout of the keypad in use. 
-char keypadLayout[3][3] ={
-                 {'1','2','3'},
-                 {'4','5','6'},
-                 {'7','8','9'},
-                };
-                
+          
 //Keypad object. Defind in Keypad.cpp initialize function. 
-Keypad pad = Keypad(makeKeymap(keypadLayout), ligne_pin, colonne_pin, 3, 3); 
+Keypad pad = Keypad(makeKeymap(Key.keys), Key.rowPins, Key.colPins, 3, 3); 
+
+
 
 /**
  * Method initializes the main hardware components.

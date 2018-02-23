@@ -20,7 +20,20 @@ class KEYPAD
 
 
   //Current key being pressed down. If none, than = 0.
-  int pressedKey = 0;
+  char pressedKey;
+
+  //Wires that represent each row.  
+  byte rowPins[3] = {5, 6, 9};
+
+  //Wires that represent each column.
+  byte colPins[3] = {11, 12, 13};
+  
+  //Matrix layout of the keypad in use. 
+  char keys[3][3] ={
+                    {'1','2','3'},
+                    {'4','5','6'},
+                    {'7','8','9'},
+                   };
  
 };
 

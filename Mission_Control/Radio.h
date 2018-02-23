@@ -92,7 +92,7 @@ class RADIO
   //List of nodes currently logged into network. 
   // MC - 1
   // EE - 2
-  float nodeList[10] = {1.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; 
+  float nodeList[10] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; 
   
   //Stores all information related to the network of the Eagle Eye program.
 	//   This struct reads specific indexes and than rebroadcasts the updated transmission to
@@ -105,9 +105,9 @@ class RADIO
 		
 		//Each of these is defined in the Data.h struct. Refer to its documentation as needed.
 		float L_TS = 0.0;
-		float Altitude = 25000;
-		float Latitude = 43.23;
-		float Longitude = 93.111;
+		float Altitude = 0.0;
+		float Latitude = 0.0;
+		float Longitude = 0.0;
 		float LE = 0.0;
 		
 		/**
