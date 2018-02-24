@@ -17,10 +17,12 @@ class KEYPAD
   //Checks for new key press. Records its value. 
   void check(char temp);
 
+  //Converts char key to its button integer on the keypad. 
+  int convertCharToInt(char key);
 
 
   //Current key being pressed down. If none, than = 0.
-  char pressedKey;
+  int pressedKey;
 
   //Wires that represent each row.  
   byte rowPins[3] = {5, 6, 9};
@@ -34,7 +36,6 @@ class KEYPAD
                     {'4','5','6'},
                     {'7','8','9'},
                    };
- 
 };
 
 #endif

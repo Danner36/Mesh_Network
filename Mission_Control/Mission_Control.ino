@@ -44,7 +44,7 @@ void setup(){
  * MAIN PROGRAM CODE.
  */
 void loop(){
-
+  
   //Looks to see any keys have been pressed. Updates the variable "pressedKey" if found.
   Key.check(pad.getKey());
   
@@ -55,6 +55,9 @@ void loop(){
 
   //Displays current information of craft.
   Data.displayInfo();
+
+  //Resets the newData state to no new data.
+  Data.newData = Data.NO;
   
-  delay(5000);
+  delay(40);
 }

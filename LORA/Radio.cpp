@@ -174,7 +174,8 @@ void RADIO::manager()
 	
 	//Checks for a specific Craft ID. '999.9' signals the start of operation.
 	if(Network.Craft_ID == 999.9 && !Radio.checkedIn){
-		
+
+    Serial.println("rollcall enabled");
 		//Responds to Mission Control with the correct ID to signal this node is here and listening.
 		Radio.rollCall();
 		
@@ -187,7 +188,9 @@ void RADIO::manager()
 	//   HABET - delays .. seconds  <- NOT CURRENTLY INCLUDED.
 	//   EE - delays 5 seconds
 	else if(Network.Craft_ID == 555.5){
-		
+
+    Serial.println("recieved start signal");
+    
 		//Delays 5 seconds.
 		delay(5000);
     
@@ -197,8 +200,9 @@ void RADIO::manager()
 	}
 	//Each of the 3 crafts have 5 seconds to broadcast. That means each craft will broadcast every 15 seconds.
 	//   15000 milliseconds = 15 seconds.
-	else if(millis() - start >= 15000){
-		
+	else if((millis() - start >= 15000) && startSignal){
+
+    Serial.println("normal broadcast");
 		//Resets the counter. This disables broadcasting again until 15 seconds has passed.
 		start = millis();
 		
@@ -219,13 +223,16 @@ void RADIO::radioReceive()
 	
 	//Gets the length of the above temporary varaible.
 	uint8_t len = sizeof(buf);
-	
+
 	//Reads in the avaiable radio transmission, then checks if it is corrupt or complete.
 	if(rf95.recv(buf, &len)) {
 
-    //Blinks LED.
-    blinkLED();
-		
+    int i = 0;
+    while(i<len){
+      Serial.print(buf[i]);
+      i++;
+    }
+    Serial.println();
 		//This whole section is comparing the currently held varaibles from the last radio update
 		//   to that of the newly received signal. Updates the craft's owned variables and copies
 		//   down the other nodes varaibles. If the timestamp indicates that this craft currently 
@@ -261,7 +268,6 @@ void RADIO::radioReceive()
 			Network.Command_Sent = Radio.getCommandSent(buf);
 			Network.Command_Received = Radio.getCommandReceived(buf);
 		}
-		
 	}
 }
 
@@ -276,7 +282,7 @@ void RADIO::rollCall()
 	
 	//Sends the transmission via radio.
 	Radio.broadcast();
-	
+	Serial.println("check in sent");
 	//Updates Checked_In Status.
 	checkedIn = true;
 }
@@ -325,7 +331,7 @@ void RADIO::broadcast()
                          char(Network.Craft_ID)
                          };
 	
-	//Serial.print("Radio Sending: ");Serial.println(transmission);
+	Serial.print("Radio Sending: ");Serial.println(transmission);
   
 	//Sends message passed in as paramter via antenna.
 	rf95.send(transmission, sizeof(transmission));
@@ -333,19 +339,4 @@ void RADIO::broadcast()
 	//Pauses all operations until the micro controll has guaranteed the transmission of the
 	//   signal. 
 	rf95.waitPacketSent();
-}
-
-
-/*
- * Blinks LED.
- */
-void blinkLED(){
-
-  //ON
-  digitalWrite(LED, HIGH);
-
-  delay(10);
-
-  //OFF
-  digitalWrite(LED, LOW);
 }

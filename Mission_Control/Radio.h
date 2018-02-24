@@ -88,11 +88,30 @@ class RADIO
   //State of RollCall.
   enum rollCallStatus {NOTSTARTED, RUNNING, COMPLETE};
   enum rollCallStatus RCstate = NOTSTARTED;
+
+  //Holds RCstate's (enum) text value. 
+  String RCString = "NONSTARTED";
   
   //List of nodes currently logged into network. 
   // MC - 1
   // EE - 2
-  float nodeList[10] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; 
+  float nodeList[10] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+
+  //State of Radio program. 
+  //   ROLLCALL - Currently in RollCall process. 
+  //   STANDBY  - RollCall completed, waiting for user to send out start signal. 
+  //   NORMAL   - Radio is running in its normal operation state. 
+  enum RadioStatus {NONE, ROLLCALL, STANDBY, NORMAL};
+  enum RadioStatus OperationMode = NONE;
+
+  //Holds OperationMode's (enum) text value. 
+  String OpModeString = "NOTSTARTED";
+
+  //Holds the current received radio signal. 
+  String radioInput = "";
+
+  //Holds the current sent radio signal.
+  String radioOutput = "";
   
   //Stores all information related to the network of the Eagle Eye program.
 	//   This struct reads specific indexes and than rebroadcasts the updated transmission to
@@ -144,14 +163,15 @@ class RADIO
 		//   or if we have a direct line of communication with each node.
 		float Craft_ID = 0.0;
 	};
-  
 	struct Network_Data Network;
 
-  //This timer is used for syncing the mesh network. Every craft as 5 seconds to talk. 
-  //   When this timer is at 0, that means the craft just broadcasted its data. When this
-  //   this timer hits 15, it resets to 0. This insures that the 2 other nodes have their 5
-  //   seconds to talk. 3nodes * 5seconds = 15seconds for a total netowrk revolution. 
+  //Timer is used to for the 10 second interval that the craft will broadcast when in normal. 
+  //   operating mode. This value is in milliseconds.  
   unsigned long start = 0;
+
+  //Timer is used to for the 10 second interval that the craft will broadcast on for RollCall. 
+  //   This value is in milliseconds.  
+  unsigned long RCBroadcast = 0;
 
 };
 

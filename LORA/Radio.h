@@ -79,6 +79,10 @@ class RADIO
  	
 	//Status of the craft replying to Mission Control with its node #.
 	bool checkedIn = false;
+
+  //Status of Start singal. True is recevied. False if not. 
+  bool startSignal = false;
+
 	
 	//Stores all information related to the network of the Eagle Eye program.
 	//   This struct reads specific indexes and than rebroadcasts the updated transmission to
@@ -91,9 +95,9 @@ class RADIO
 		
 		//Each of these is defined in the Data.h struct. Refer to its documentation as needed.
 		float L_TS = 0.0;
-		float Altitude = 0.0;
-		float Latitude = 0.0;
-		float Longitude = 0.0;
+		float Altitude = 20000.0;
+		float Latitude = -43.123456;
+		float Longitude = 93.123456;
 		float LE = 0.0;
 		
 		/**

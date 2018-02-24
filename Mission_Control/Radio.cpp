@@ -169,49 +169,80 @@ void RADIO::manager()
   //Checks to see if its time for Roll Call. This gets updated in 
   if(Key.pressedKey == 9 || RCstate == RUNNING){
 
-    Serial.println("Starting RollCall");
+    if(Key.pressedKey == 9){
+      
+      //Updates RollCallStatus to running. 
+      RCstate = RUNNING;
+      RCString = "RUNNING";
 
-    //Updates RollCallStatus to running. 
-    RCstate = RUNNING;
+      //Updates overall radio state.
+      OperationMode = ROLLCALL;
+      OpModeString = "ROLLCALL";
 
-    //Calls function. 
-    Radio.rollCall();
-
-    //Compares currently checked in node with the network to prevent duplicate nodes.
-    Radio.nodeCheckIn();
-
-    if(Key.pressedKey == 8){
-
-      Serial.println("Ending RollCall");
-
+      //Calls function. 
+      Radio.rollCall();
+    }
+    
+    //Checks for the stop signal to RollCall. 
+    else if(Key.pressedKey == 8){
+      
       //Updates RollCallStatus to complete.
       RCstate = COMPLETE;
+      RCString = "COMPLETE";
+
+      //Updates overall radio state to standby. Not waiting for user to send start signal. 
+      OperationMode = STANDBY;
+      OpModeString = "STANDBY";
+    }
+
+    //This else statement appears to have duplicate code from the above if statement. 
+    //   This is needed because it allows the program to run in RollCall mode without
+    //   being directly triggered, while checking for RollCall responses. 
+    else{
+
+      //Calls function. 
+      Radio.rollCall();
+      
+      //Compares currently checked in node with the network to prevent duplicate nodes.
+      Radio.nodeCheckIn();
     }
   }
  
 	//After Roll Call is complete, Mission Control will broadcast the start signal. Appropriate delays are
-	//   distributed below to initally sync the network to a 5 second split. This makes for a 15 second revolution.
+	//   distributed below to initally sync the network to a 5 second split. This makes for a 10 second revolution.
 	//
 	//   MC - starts instantly
-	//   HABET - delays 5 seconds
-	//   EE - delays 10 seconds
-	else if(Network.Craft_ID == 555.5 && RCstate == COMPLETE){
-		
+	//   EE - delays 5 seconds                                     //Key press 7 sends network start signal to nodes. 
+	else if((RCstate == COMPLETE) && (Key.pressedKey == 7 && OperationMode == STANDBY)){
+
+    //Updates Craft_ID to the network start signal. 
+    Radio.Network.Craft_ID = 555.5;
+
+    //Updates radio state.
+    OperationMode = NORMAL;
+    OpModeString = "NORMAL";
+    
+    //Serial.println("Sending Start Signal");
+    
 		//Does not delay because MS is the first node to broadcast after rollcall is compelted.
 		//delay(0000);
 		
 	}
-	//Each of the 3 crafts have 5 seconds to broadcast. That means each craft will broadcast every 15 seconds.
+	//Each of the 2 crafts have 5 seconds to broadcast. That means each craft will broadcast every 10 seconds.
 	//   15000milliseconds = 15 seconds.
-	else if(millis() - start >= 15000 && RCstate == COMPLETE){
+	else if((millis() - start >= 10000) && (RCstate == COMPLETE) && (OperationMode == NORMAL)){
 		
-		//Resets the counter. This disabled broadcasting agian until 15 seconds has passed.
+		//Resets the counter. This disabled broadcasting agian until 10 seconds has passed.
 		start = millis();
 		
 		//Sends the transmission via radio.
 		Radio.broadcast();
-    
-    Serial.println("Broadcasting");
+
+    if(Network.Craft_ID == 555.5){
+      delay(500);
+      Network.Craft_ID = 1.0;
+      Radio.broadcast();
+    }
 	}
 }
 
@@ -231,6 +262,9 @@ void RADIO::nodeCheckIn()
       //Compares current ID to the nodes that have already checked in. 
       if(nodeList[i] == 0.0 && nodeList[i] != receivedID){
 
+        //New info is being read in. 
+        Data.newData = Data.YES;
+      
         //If not found and an empty spot is found, it adds the node to the network. 
         nodeList[i] = receivedID;
       }
@@ -253,8 +287,7 @@ void RADIO::radioReceive()
 	//Reads in the avaiable radio transmission.
 	if(rf95.recv(buf, &len)) {
 
-    //Blinks LED.
-    blinkLED();
+    radioInput = buf;
     
 		//This whole section is comparing the currently held varaibles from the last radio update
 		//   to that of the newly received signal. Updates the LoRa's owned variables and copies
@@ -266,7 +299,10 @@ void RADIO::radioReceive()
 		
 		//Compares the currently brought in time stamp to the one stored onboad.
 		if(temp_HABET > Radio.Network.H_TS){
-			
+
+      //New info is being read in. 
+      Data.newData = Data.YES;
+      
 			//If the incoming signal has more up-to-date versions, we overwrite our saved version with
 			//   the new ones.
 			Network.H_TS = temp_HABET;
@@ -279,7 +315,10 @@ void RADIO::radioReceive()
 		
 		//Compares the currently brought in time stamp to the one stored onboad.
 		if(temp_LoRa > Radio.Network.L_TS){
-			
+
+      //New info is being read in. 
+      Data.newData = Data.YES;
+      
 			//If the incoming signal has more up-to-date versions, we overwrite our saved version with
 			//   the new ones.
 			Network.L_TS = temp_LoRa;
@@ -302,10 +341,16 @@ void RADIO::rollCall()
 {
 	//Updates the Craft_ID to the network call in signal "999.9".
 	Network.Craft_ID = 999.9;
-	
-	//Sends the transmission via radio.
-	Radio.broadcast();
-  
+
+  //Timer of 5 seconds. 
+  if(millis() - RCBroadcast >= 5000){
+    
+    //Resets the counter. This disabled rollcall broadcasting again until 5 seconds has passed.
+    RCBroadcast = millis();
+
+    //Sends the transmission via radio.
+    Radio.broadcast();
+  }
 }
 
 
@@ -316,35 +361,48 @@ void RADIO::broadcast()
 {
   
 	//Updates the time object to hold the most current operation time.
-	Network.MC_TS = millis();
+	Network.MC_TS = millis()/1000.0;
 	
   //Casting all float values to a character array with commas saved in between values
   //   so the character array can be parsed when received by another craft.
-  char transmission[] = {char(Network.L_TS),
-                         ',',
-                         char(Network.Altitude),
-                         ',',
-                         char(Network.Latitude),
-                         ',',
-                         char(Network.Longitude),
-                         ',',
-                         char(Network.LE),
-                         ',',
-                         char(Network.H_TS),
-                         ',',
-                         char(Network.Release_Status),
-                         ',',
-                         char(Network.MC_TS),
-                         ',',
-                         char(Network.Command_Sent),
-                         ',',
-                         char(Network.Command_Received),
-                         ',',
-                         char(Network.Craft_ID)
-                         };
+  String temp = "";
   
-  //Serial.print("Radio Sending: ");Serial.println(transmission);
+  temp += Network.L_TS;
+  temp += ",";
+  temp += Network.Altitude;
+  temp += ",";
+  temp += Network.Latitude;
+  temp += ",";
+  temp += Network.Longitude;
+  temp += ",";
+  temp += Network.LE;
+  temp += ",";
+  temp += Network.H_TS;
+  temp += ",";
+  temp += Network.Release_Status;
+  temp += ",";
+  temp += Network.MC_TS;
+  temp += ",";
+  temp += Network.Command_Sent;
+  temp += ",";
+  temp += Network.Command_Received;
+  temp += ",";
+  temp += Network.Craft_ID;
+
+  //Copy contents. 
+  radioOutput = temp;
+
+  //New info is being read in. 
+  Data.newData = Data.YES;
   
+  char transmission[temp.length()];
+
+  temp.toCharArray(transmission, temp.length());
+  
+
+  //Blinks LED onboard of LoRa to signal keypad interaction. 
+  blinkLED();
+    
   //Sends message passed in as paramter via antenna.
   rf95.send(transmission, sizeof(transmission));
     
