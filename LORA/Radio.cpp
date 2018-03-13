@@ -50,7 +50,7 @@ float RADIO::getCommandSent(uint8_t buf)
 /**
  * Parses and returns the radio transmission's Craft ID.
  */
-float RADIO::getCraftID(uint8_t buf)
+float RADIO::getCraftID(char buf[])
 {
 	return (Data.Parse(buf,10));
 }
@@ -109,8 +109,6 @@ float RADIO::getTimeStamp(uint8_t buf, int selector)
  */
 void RADIO::initialize()
 {
-	//Assigns pin 13 to have an output power connection to the LoRa's onboard LED.
-	pinMode(LED, OUTPUT);
 	
 	//Assigns pin 4 to have an output singal connection to the LoRa's radio port.
 	pinMode(RFM95_RST, OUTPUT);
@@ -173,9 +171,9 @@ void RADIO::manager()
 	Radio.radioReceive();
 	
 	//Checks for a specific Craft ID. '999.9' signals the start of operation.
-	if(Network.Craft_ID == 999.9 && !Radio.checkedIn){
+	if(receivedID == 999.9 && !Radio.checkedIn){
 
-    Serial.println("rollcall enabled");
+    Serial.println("Rollcall enabled");
 		//Responds to Mission Control with the correct ID to signal this node is here and listening.
 		Radio.rollCall();
 		
@@ -187,7 +185,7 @@ void RADIO::manager()
 	//   MS - starts instantly
 	//   HABET - delays .. seconds  <- NOT CURRENTLY INCLUDED.
 	//   EE - delays 5 seconds
-	else if(Network.Craft_ID == 555.5){
+	else if(receivedID == 555.5){
 
     Serial.println("recieved start signal");
     
@@ -217,57 +215,54 @@ void RADIO::manager()
  */
 void RADIO::radioReceive()
 {
-  
-	//Creates a temporary varaible to read in the incoming transmission. 
-	uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
-	
-	//Gets the length of the above temporary varaible.
-	uint8_t len = sizeof(buf);
 
-	//Reads in the avaiable radio transmission, then checks if it is corrupt or complete.
-	if(rf95.recv(buf, &len)) {
+  //Checks if radio message has been received.
+  if (rf95.available()){
+  	//Creates a temporary varaible to read in the incoming transmission. 
+  	uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
+  	
+  	//Gets the length of the above temporary varaible.
+  	uint8_t len = sizeof(buf);
+      
+    //Reads in the avaiable radio transmission, then checks if it is corrupt or complete.
+    if(rf95.recv(buf, &len)) {
+      
+      //This whole section is comparing the currently held varaibles from the last radio update
+      //   to that of the newly received signal. Updates the craft's owned variables and copies
+      //   down the other nodes varaibles. If the timestamp indicates that this craft currently 
+      //   holds the most updated values for another node (ie: LoRa's time stamp is higher than the 
+      //   new signal's), it replaces those variables.
+      
+      //Reads in the time stamp for HABET's last broadcast.
+      float tempHABET = Radio.getTimeStamp(buf, 5);
+      
+      //Compares the currently brought in time stamp to the one stored onboad.
+      if(tempHABET > Radio.Network.H_TS){
+        
+        //If the incoming signal has more up-to-date versions, we overwrite our saved version with
+        //   the new ones.
+        Network.H_TS = tempHABET;
+        Network.Release_Status = Radio.getReleaseStatus(buf);
+        
+      }
+      
+      //Reads in the time stamp for Mission Control's last broadcast.
+      float tempMC = Radio.getTimeStamp(buf, 7);
+      
+      //Compares the currently brought in time stamp to the one stored onboad.
+      if(tempMC > Network.MC_TS){
+        
+        //If the incoming signal has more up-to-date versions, we overwrite our saved version with
+        //   the new ones.
+        Network.MC_TS = tempMC;
+        Network.Command_Sent = Radio.getCommandSent(buf);
+        Network.Command_Received = Radio.getCommandReceived(buf);
+      }
 
-    int i = 0;
-    while(i<len){
-      Serial.print(buf[i]);
-      i++;
+      //Reads in Craft ID to see where signal came from. 
+      receivedID = Radio.getCraftID(buf);
+      Serial.println("ID: "); Serial.println(receivedID);
     }
-    Serial.println();
-		//This whole section is comparing the currently held varaibles from the last radio update
-		//   to that of the newly received signal. Updates the craft's owned variables and copies
-		//   down the other nodes varaibles. If the timestamp indicates that this craft currently 
-		//	 holds the most updated values for another node (ie: LoRa's time stamp is higher than the 
-		//   new signal's), it replaces those variables.
-		
-		
-		
-		//Reads in the time stamp for HABET's last broadcast.
-		float tempHABET = Radio.getTimeStamp(buf, 5);
-		
-		//Compares the currently brought in time stamp to the one stored onboad.
-		if(tempHABET > Radio.Network.H_TS){
-			
-			//If the incoming signal has more up-to-date versions, we overwrite our saved version with
-			//   the new ones.
-			Network.H_TS = tempHABET;
-			Network.Release_Status = Radio.getReleaseStatus(buf);
-			
-		}
-		
-		
-		
-		//Reads in the time stamp for Mission Control's last broadcast.
-		float tempMC = Radio.getTimeStamp(buf, 7);
-		
-		//Compares the currently brought in time stamp to the one stored onboad.
-		if(tempMC > Network.MC_TS){
-			
-			//If the incoming signal has more up-to-date versions, we overwrite our saved version with
-			//   the new ones.
-			Network.MC_TS = tempMC;
-			Network.Command_Sent = Radio.getCommandSent(buf);
-			Network.Command_Received = Radio.getCommandReceived(buf);
-		}
 	}
 }
 
@@ -282,7 +277,7 @@ void RADIO::rollCall()
 	
 	//Sends the transmission via radio.
 	Radio.broadcast();
-	Serial.println("check in sent");
+	Serial.println("Check in sent");
 	//Updates Checked_In Status.
 	checkedIn = true;
 }

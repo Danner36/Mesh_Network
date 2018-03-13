@@ -278,59 +278,63 @@ void RADIO::nodeCheckIn()
  */
 void RADIO::radioReceive()
 {
-	//Creates a temporary varaible to read in the incoming transmission. 
-	uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
-	
-	//Gets the length of the above temporary varaible.
-	uint8_t len = sizeof(buf);
-	
-	//Reads in the avaiable radio transmission.
-	if(rf95.recv(buf, &len)) {
-
-    radioInput = buf;
+  //Checks if radio message has been received.
+  if (rf95.available()){
+    //Creates a temporary varaible to read in the incoming transmission. 
+    uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
     
-		//This whole section is comparing the currently held varaibles from the last radio update
-		//   to that of the newly received signal. Updates the LoRa's owned variables and copies
-		//   down the other nodes varaibles. If the time LoRa currently holds the most updated values
-		//   for another node (LoRa's time stamp is higher than the new signal's), it replaces those vars.
-		
-		//Reads in the time stamp for HABET's last broadcast.
-		float temp_HABET = Radio.getTimeStamp(buf, 5);
-		
-		//Compares the currently brought in time stamp to the one stored onboad.
-		if(temp_HABET > Radio.Network.H_TS){
-
-      //New info is being read in. 
-      Data.newData = Data.YES;
+    //Gets the length of the above temporary varaible.
+    uint8_t len = sizeof(buf);
+    
+    //Reads in the avaiable radio transmission.
+    if(rf95.recv(buf, &len)) {
+  
+      //Used to display the received data in the GUI.
+      radioInput = buf;
       
-			//If the incoming signal has more up-to-date versions, we overwrite our saved version with
-			//   the new ones.
-			Network.H_TS = temp_HABET;
-			Network.Release_Status = Radio.getReleaseStatus(buf);
-			
-		}
-		
-		//Reads in the time stamp for Mission Control's last broadcast.
-		float temp_LoRa = Radio.getTimeStamp(buf, 0);
-		
-		//Compares the currently brought in time stamp to the one stored onboad.
-		if(temp_LoRa > Radio.Network.L_TS){
-
-      //New info is being read in. 
-      Data.newData = Data.YES;
+      //This whole section is comparing the currently held varaibles from the last radio update
+      //   to that of the newly received signal. Updates the LoRa's owned variables and copies
+      //   down the other nodes varaibles. If the time LoRa currently holds the most updated values
+      //   for another node (LoRa's time stamp is higher than the new signal's), it replaces those vars.
       
-			//If the incoming signal has more up-to-date versions, we overwrite our saved version with
-			//   the new ones.
-			Network.L_TS = temp_LoRa;
-			Network.Altitude = Radio.getRadioAltitude(buf);
-			Network.Latitude = Radio.getRadioLatitude(buf);
-			Network.Longitude = Radio.getRadioLongitude(buf);
-			Network.LE = Radio.getLoRaEvent(buf);
-		}
-
-    //Reads in Craft ID to see where signal came from. 
-    receivedID = Radio.getCraftID(buf);
-	}
+      //Reads in the time stamp for HABET's last broadcast.
+      float temp_HABET = Radio.getTimeStamp(buf, 5);
+      
+      //Compares the currently brought in time stamp to the one stored onboad.
+      if(temp_HABET > Radio.Network.H_TS){
+  
+        //New info is being read in. 
+        Data.newData = Data.YES;
+        
+        //If the incoming signal has more up-to-date versions, we overwrite our saved version with
+        //   the new ones.
+        Network.H_TS = temp_HABET;
+        Network.Release_Status = Radio.getReleaseStatus(buf);
+        
+      }
+      
+      //Reads in the time stamp for Mission Control's last broadcast.
+      float temp_LoRa = Radio.getTimeStamp(buf, 0);
+      
+      //Compares the currently brought in time stamp to the one stored onboad.
+      if(temp_LoRa > Radio.Network.L_TS){
+  
+        //New info is being read in. 
+        Data.newData = Data.YES;
+        
+        //If the incoming signal has more up-to-date versions, we overwrite our saved version with
+        //   the new ones.
+        Network.L_TS = temp_LoRa;
+        Network.Altitude = Radio.getRadioAltitude(buf);
+        Network.Latitude = Radio.getRadioLatitude(buf);
+        Network.Longitude = Radio.getRadioLongitude(buf);
+        Network.LE = Radio.getLoRaEvent(buf);
+      }
+  
+      //Reads in Craft ID to see where signal came from. 
+      receivedID = Radio.getCraftID(buf);
+    }
+  }
 }
 
 
@@ -394,12 +398,11 @@ void RADIO::broadcast()
 
   //New info is being read in. 
   Data.newData = Data.YES;
-  
-  char transmission[temp.length()];
 
+  //Converts from String to char array. 
+  char transmission[temp.length()];
   temp.toCharArray(transmission, temp.length());
   
-
   //Blinks LED onboard of LoRa to signal keypad interaction. 
   blinkLED();
     

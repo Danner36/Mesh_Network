@@ -24,7 +24,7 @@ class RADIO
 	float getCommandSent(uint8_t buf);
   	
 	//Returns the transmission's craft ID.
-	float getCraftID(uint8_t buf);
+	float getCraftID(char buf[]);
   	
 	//Returns the transmission's Latitude.
 	float getRadioLatitude(uint8_t buf);
@@ -71,9 +71,6 @@ class RADIO
 	//Reset pin onboard the radio.
 	const byte RFM95_RST = 4;
 	
-	//Pins used to blink an LED to signal receival packet.
-	const byte LED = 13;
-	
 	//Radio frequency used throught the Eagle Eye Program. CHECK WITH HABET BEFORE EACH FLIGHT!!!!!
 	#define RF95_FREQ 433.0
  	
@@ -82,6 +79,9 @@ class RADIO
 
   //Status of Start singal. True is recevied. False if not. 
   bool startSignal = false;
+
+  //Holds the ID of the craft that just broadcasted.  
+  float receivedID = 0.0;
 
 	
 	//Stores all information related to the network of the Eagle Eye program.
