@@ -15,31 +15,31 @@ class RADIO
 	RADIO();
   	
 	//Returns the transmission's Altitude.
-	float getRadioAltitude(uint8_t buf);
+	float getRadioAltitude(char buf[]);
   	
 	//Returns the transmission's CR variable.
-	float getCommandReceived(uint8_t buf);
+	float getCommandReceived(char buf[]);
 	
 	//Returns the transmission's CS variable.
-	float getCommandSent(uint8_t buf);
+	float getCommandSent(char buf[]);
   	
 	//Returns the transmission's craft ID.
 	float getCraftID(char buf[]);
   	
 	//Returns the transmission's Latitude.
-	float getRadioLatitude(uint8_t buf);
+	float getRadioLatitude(char buf[]);
   	
 	//Returns the transmission's Longitude.
-	float getRadioLongitude(uint8_t buf);
+	float getRadioLongitude(char buf[]);
   	
 	//Returns the transmission's Latitude.
-	float getLoRaEvent(uint8_t buf);
+	float getLoRaEvent(char buf[]);
 	
 	//Returns the transmission's Release Status.
-	float getReleaseStatus(uint8_t buf);
+	float getReleaseStatus(char buf[]);
 	
 	//Returns the transmission's time stamp.
-	float getTimeStamp(uint8_t buf, int selector);
+	float getTimeStamp(char buf[], int selector);
 	
 	//Runs initialzation script for the Radio.
 	void initialize();
@@ -95,9 +95,9 @@ class RADIO
 		
 		//Each of these is defined in the Data.h struct. Refer to its documentation as needed.
 		float L_TS = 0.0;
-		float Altitude = 20000.0;
-		float Latitude = -43.123456;
-		float Longitude = 93.123456;
+		float Altitude = 0.0;
+		float Latitude = 0.0;
+		float Longitude = 0.0;
 		float LE = 0.0;
 		
 		/**

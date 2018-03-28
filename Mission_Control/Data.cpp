@@ -43,10 +43,8 @@ float DATA::Parse(char message[], int objective){
   //The number of commas that the program needs to pass before it started parsing the data.
   int goalNumber = objective;
   
-  //Used to iterate through the character arrays.
+  //Used to iterate through the passed in character array.
   int i = 0;
-  int t = 0;
-  
   
   //This iterator is used to pull the wanted part of the 'message' from the entire array.
   //   Used to gather information such as how long the new parsed section is.
@@ -78,7 +76,7 @@ float DATA::Parse(char message[], int objective){
       if(message[i] != ','){
         
         //Copies the message's character to the temporary array.
-        tempArr[t] = message[i];
+        tempArr[tempIter] = message[i];
         
         //Iterator used to tell how long the temporary array is.
         tempIter++;
@@ -156,7 +154,6 @@ void DATA::displayInfo()
 void DATA::printNodes(){
   
   int i = 0;
-
   while(i<10){
     //Only prints nodes. Not empty elements.
     if(Radio.nodeList[i] != 0.0){

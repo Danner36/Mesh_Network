@@ -25,8 +25,6 @@ DATA::DATA()
  */
 float DATA::Parse(char message[], int objective){
 
-  Serial.println("In parse");
-  Serial.println(objective);
 	//Example GPS Transmission. (GGA)
 	//
 	//  $GPGGA,123519,4807.038,N,01131.000,E,1,08,0.9,545.4,M,46.9,M,,*47
@@ -42,12 +40,10 @@ float DATA::Parse(char message[], int objective){
   //  $,GPSAltitude, Latitude, Longitude, TargetLat, TargetLon, Roll, Pitch, Yaw, Speed , TargetDistance, Time,$
   //         1           2         3          4           5       6     7     8     9          10          11
 	//The number of commas that the program needs to pass before it started parsing the data.
-	int goalNumber = objective;
+	//  parameter objective ^^^
   
-	//Used to iterate through the character arrays.
+	//Used to iterate through the passed in character array.
 	int i = 0;
-	int t = 0;
-  
   
 	//This iterator is used to pull the wanted part of the 'message' from the entire array.
 	//   Used to gather information such as how long the new parsed section is.
@@ -64,7 +60,7 @@ float DATA::Parse(char message[], int objective){
 	char tempArr[20];
   
 	//Iterators over the entire array.
-	for(i=0;i<120;i++){
+	for(i=0;i<150;i++){
 		
 		//Checks to see if the current iterator's position is a comma. 
 		if(message[i] == ','){
@@ -73,20 +69,20 @@ float DATA::Parse(char message[], int objective){
 			commaCounter++;
 		}
 		//Checks to see if the desired amount of commas has been passed. 
-		else if(commaCounter == goalNumber){
+		else if(commaCounter == objective){
       
 			//Checks to see if the iterator's position is a comma, used to cause a stop in parsing.
 			if(message[i] != ','){
         
 				//Copies the message's character to the temporary array.
-				tempArr[t] = message[i];
+				tempArr[tempIter] = message[i];
         
 				//Iterator used to tell how long the temporary array is.
 				tempIter++;
 			}
 		}
 	}
-  
+ 
 	//Charater array used with a fitted length of the parsed section.
 	char arr[tempIter];
   

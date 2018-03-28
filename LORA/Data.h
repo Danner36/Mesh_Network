@@ -29,16 +29,16 @@ class DATA
 	struct Flight_Data {
 	
 		//Altitude of the craft gathered from GPS.
-		float Altitude = 0.0;
+		float Altitude  = 20000.0;
 
     //Current distance to target in meters.
     float TargetDistance = 0.0;
 	
 		//Latitude of the craft gathered from GPS.
-		float Latitude = 0.0;
+		float Latitude = -43.123456;
 		
 		//Longitude of the craft gathered from GPS.
-		float Longitude = 0.0;
+		float Longitude = 93.123456;
 		
 		//Satellite Count of the craft gathered from the GPS.
 		float SatCount = 0.0;

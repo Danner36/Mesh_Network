@@ -23,7 +23,7 @@ RADIO::RADIO()
 /**
  * Parses and returns the radio transmission's altitude.
  */
-float RADIO::getRadioAltitude(uint8_t buf)
+float RADIO::getRadioAltitude(char buf[])
 {
   return (Data.Parse(buf,1));
 }
@@ -32,7 +32,7 @@ float RADIO::getRadioAltitude(uint8_t buf)
 /**
  * Parses and returns the radio transmission's Command Received.
  */
-float RADIO::getCommandReceived(uint8_t buf)
+float RADIO::getCommandReceived(char buf[])
 {
   return (Data.Parse(buf,9));
 }
@@ -41,7 +41,7 @@ float RADIO::getCommandReceived(uint8_t buf)
 /**
  * Parses and returns the radio transmission's Command Sent.
  */
-float RADIO::getCommandSent(uint8_t buf)
+float RADIO::getCommandSent(char buf[])
 {
   return (Data.Parse(buf,8));
 }
@@ -50,7 +50,7 @@ float RADIO::getCommandSent(uint8_t buf)
 /**
  * Parses and returns the radio transmission's Craft ID.
  */
-float RADIO::getCraftID(uint8_t buf)
+float RADIO::getCraftID(char buf[])
 {
   return (Data.Parse(buf,10));
 }
@@ -59,7 +59,7 @@ float RADIO::getCraftID(uint8_t buf)
 /**
  * Parses and returns the radio transmission's latitude.
  */
-float RADIO::getRadioLatitude(uint8_t buf)
+float RADIO::getRadioLatitude(char buf[])
 {
   return (Data.Parse(buf,2));
 }
@@ -68,7 +68,7 @@ float RADIO::getRadioLatitude(uint8_t buf)
 /**
  * Parses and returns the radio transmission's longitude.
  */
-float RADIO::getRadioLongitude(uint8_t buf)
+float RADIO::getRadioLongitude(char buf[])
 {
   return (Data.Parse(buf,3));
 }
@@ -77,7 +77,7 @@ float RADIO::getRadioLongitude(uint8_t buf)
 /**
  * Parses and returns the radio transmission's LoRa Event.
  */
-float RADIO::getLoRaEvent(uint8_t buf)
+float RADIO::getLoRaEvent(char buf[])
 {
   return (Data.Parse(buf,4));
 }
@@ -86,7 +86,7 @@ float RADIO::getLoRaEvent(uint8_t buf)
 /**
  * Parses and returns the radio transmission's Release Status.
  */
-float RADIO::getReleaseStatus(uint8_t buf)
+float RADIO::getReleaseStatus(char buf[])
 {
   return (Data.Parse(buf,6));
 }
@@ -98,7 +98,7 @@ float RADIO::getReleaseStatus(uint8_t buf)
  *    HABET -> 5
  *    MC    -> 7
  */
-float RADIO::getTimeStamp(uint8_t buf, int selector)
+float RADIO::getTimeStamp(char buf[], int selector)
 {
   return (Data.Parse(buf, selector));
 }
@@ -202,9 +202,6 @@ void RADIO::manager()
 
       //Calls function. 
       Radio.rollCall();
-      
-      //Compares currently checked in node with the network to prevent duplicate nodes.
-      Radio.nodeCheckIn();
     }
   }
  
@@ -267,7 +264,11 @@ void RADIO::nodeCheckIn()
       
         //If not found and an empty spot is found, it adds the node to the network. 
         nodeList[i] = receivedID;
+
+        break;
       }
+
+      i++;
     }
   }
 }
@@ -288,9 +289,18 @@ void RADIO::radioReceive()
     
     //Reads in the avaiable radio transmission.
     if(rf95.recv(buf, &len)) {
-  
+
+      //New info is being read in. 
+      Data.newData = Data.YES;
+        
       //Used to display the received data in the GUI.
       radioInput = buf;
+
+      //Conversion from uint8_t to string. The purpose of this is to be able to convert to an 
+      //   unsigned char array for parsing. 
+      String str = (char*)buf;
+      char toParse[str.length()];
+      str.toCharArray(toParse,str.length());
       
       //This whole section is comparing the currently held varaibles from the last radio update
       //   to that of the newly received signal. Updates the LoRa's owned variables and copies
@@ -298,41 +308,38 @@ void RADIO::radioReceive()
       //   for another node (LoRa's time stamp is higher than the new signal's), it replaces those vars.
       
       //Reads in the time stamp for HABET's last broadcast.
-      float temp_HABET = Radio.getTimeStamp(buf, 5);
+      float temp_HABET = Radio.getTimeStamp(toParse, 5);
       
       //Compares the currently brought in time stamp to the one stored onboad.
       if(temp_HABET > Radio.Network.H_TS){
-  
-        //New info is being read in. 
-        Data.newData = Data.YES;
         
         //If the incoming signal has more up-to-date versions, we overwrite our saved version with
         //   the new ones.
         Network.H_TS = temp_HABET;
-        Network.Release_Status = Radio.getReleaseStatus(buf);
+        Network.Release_Status = Radio.getReleaseStatus(toParse);
         
       }
       
       //Reads in the time stamp for Mission Control's last broadcast.
-      float temp_LoRa = Radio.getTimeStamp(buf, 0);
+      float temp_LoRa = Radio.getTimeStamp(toParse, 0);
       
       //Compares the currently brought in time stamp to the one stored onboad.
       if(temp_LoRa > Radio.Network.L_TS){
-  
-        //New info is being read in. 
-        Data.newData = Data.YES;
         
         //If the incoming signal has more up-to-date versions, we overwrite our saved version with
         //   the new ones.
         Network.L_TS = temp_LoRa;
-        Network.Altitude = Radio.getRadioAltitude(buf);
-        Network.Latitude = Radio.getRadioLatitude(buf);
-        Network.Longitude = Radio.getRadioLongitude(buf);
-        Network.LE = Radio.getLoRaEvent(buf);
+        Network.Altitude = Radio.getRadioAltitude(toParse);
+        Network.Latitude = Radio.getRadioLatitude(toParse);
+        Network.Longitude = Radio.getRadioLongitude(toParse);
+        Network.LE = Radio.getLoRaEvent(toParse);
       }
   
       //Reads in Craft ID to see where signal came from. 
-      receivedID = Radio.getCraftID(buf);
+      receivedID = Radio.getCraftID(toParse);
+
+      //Compares the transmission's craftID to see if its a brand new craft. If so, it logs it. 
+      Radio.nodeCheckIn();
     }
   }
 }
@@ -343,8 +350,8 @@ void RADIO::radioReceive()
  */
 void RADIO::rollCall()
 {
-	//Updates the Craft_ID to the network call in signal "999.9".
-	Network.Craft_ID = 999.9;
+	//Updates the Craft_ID to the network call in signal "999.0".
+	Network.Craft_ID = 999.0;
 
   //Timer of 5 seconds. 
   if(millis() - RCBroadcast >= 5000){

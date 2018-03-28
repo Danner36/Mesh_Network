@@ -23,7 +23,7 @@ RADIO::RADIO()
 /**
  * Parses and returns the radio transmission's altitude.
  */
-float RADIO::getRadioAltitude(uint8_t buf)
+float RADIO::getRadioAltitude(char buf[])
 {
 	return (Data.Parse(buf,1));
 }
@@ -32,7 +32,7 @@ float RADIO::getRadioAltitude(uint8_t buf)
 /**
  * Parses and returns the radio transmission's Command Received.
  */
-float RADIO::getCommandReceived(uint8_t buf)
+float RADIO::getCommandReceived(char buf[])
 {
 	return (Data.Parse(buf,9));
 }
@@ -41,7 +41,7 @@ float RADIO::getCommandReceived(uint8_t buf)
 /**
  * Parses and returns the radio transmission's Command Sent.
  */
-float RADIO::getCommandSent(uint8_t buf)
+float RADIO::getCommandSent(char buf[])
 {
 	return (Data.Parse(buf,8));
 }
@@ -59,7 +59,7 @@ float RADIO::getCraftID(char buf[])
 /**
  * Parses and returns the radio transmission's latitude.
  */
-float RADIO::getRadioLatitude(uint8_t buf)
+float RADIO::getRadioLatitude(char buf[])
 {
 	return (Data.Parse(buf,2));
 }
@@ -68,7 +68,7 @@ float RADIO::getRadioLatitude(uint8_t buf)
 /**
  * Parses and returns the radio transmission's longitude.
  */
-float RADIO::getRadioLongitude(uint8_t buf)
+float RADIO::getRadioLongitude(char buf[])
 {
 	return (Data.Parse(buf,3));
 }
@@ -77,7 +77,7 @@ float RADIO::getRadioLongitude(uint8_t buf)
 /**
  * Parses and returns the radio transmission's LoRa Event.
  */
-float RADIO::getLoRaEvent(uint8_t buf)
+float RADIO::getLoRaEvent(char buf[])
 {
 	return (Data.Parse(buf,4));
 }
@@ -86,7 +86,7 @@ float RADIO::getLoRaEvent(uint8_t buf)
 /**
  * Parses and returns the radio transmission's Release Status.
  */
-float RADIO::getReleaseStatus(uint8_t buf)
+float RADIO::getReleaseStatus(char buf[])
 {
 	return (Data.Parse(buf,6));
 }
@@ -98,7 +98,7 @@ float RADIO::getReleaseStatus(uint8_t buf)
  *    HABET -> 5
  *    MC    -> 7
  */
-float RADIO::getTimeStamp(uint8_t buf, int selector)
+float RADIO::getTimeStamp(char buf[], int selector)
 {
 	return (Data.Parse(buf, selector));
 }
@@ -169,9 +169,9 @@ void RADIO::manager()
   
 	//Reads in radio transmission if available.
 	Radio.radioReceive();
-	
+ 
 	//Checks for a specific Craft ID. '999.9' signals the start of operation.
-	if(receivedID == 999.9 && !Radio.checkedIn){
+	if(receivedID == 999.0 && !Radio.checkedIn){
 
     Serial.println("Rollcall enabled");
 		//Responds to Mission Control with the correct ID to signal this node is here and listening.
@@ -187,7 +187,7 @@ void RADIO::manager()
 	//   EE - delays 5 seconds
 	else if(receivedID == 555.5){
 
-    Serial.println("recieved start signal");
+    Serial.println("Recieved start signal");
     
 		//Delays 5 seconds.
 		delay(5000);
@@ -226,6 +226,12 @@ void RADIO::radioReceive()
       
     //Reads in the avaiable radio transmission, then checks if it is corrupt or complete.
     if(rf95.recv(buf, &len)) {
+
+      //Conversion from uint8_t to string. The purpose of this is to be able to convert to an 
+      //   unsigned char array for parsing. 
+      String str = (char*)buf;
+      char toParse[str.length()];
+      str.toCharArray(toParse,str.length());
       
       //This whole section is comparing the currently held varaibles from the last radio update
       //   to that of the newly received signal. Updates the craft's owned variables and copies
@@ -234,7 +240,7 @@ void RADIO::radioReceive()
       //   new signal's), it replaces those variables.
       
       //Reads in the time stamp for HABET's last broadcast.
-      float tempHABET = Radio.getTimeStamp(buf, 5);
+      float tempHABET = Radio.getTimeStamp(toParse, 5);
       
       //Compares the currently brought in time stamp to the one stored onboad.
       if(tempHABET > Radio.Network.H_TS){
@@ -242,12 +248,12 @@ void RADIO::radioReceive()
         //If the incoming signal has more up-to-date versions, we overwrite our saved version with
         //   the new ones.
         Network.H_TS = tempHABET;
-        Network.Release_Status = Radio.getReleaseStatus(buf);
+        Network.Release_Status = Radio.getReleaseStatus(toParse);
         
       }
       
       //Reads in the time stamp for Mission Control's last broadcast.
-      float tempMC = Radio.getTimeStamp(buf, 7);
+      float tempMC = Radio.getTimeStamp(toParse, 7);
       
       //Compares the currently brought in time stamp to the one stored onboad.
       if(tempMC > Network.MC_TS){
@@ -255,13 +261,13 @@ void RADIO::radioReceive()
         //If the incoming signal has more up-to-date versions, we overwrite our saved version with
         //   the new ones.
         Network.MC_TS = tempMC;
-        Network.Command_Sent = Radio.getCommandSent(buf);
-        Network.Command_Received = Radio.getCommandReceived(buf);
+        Network.Command_Sent = Radio.getCommandSent(toParse);
+        Network.Command_Received = Radio.getCommandReceived(toParse);
       }
 
       //Reads in Craft ID to see where signal came from. 
-      receivedID = Radio.getCraftID(buf);
-      Serial.println("ID: "); Serial.println(receivedID);
+      receivedID = Radio.getCraftID(toParse);
+      Serial.print("ID: "); Serial.println(receivedID);
     }
 	}
 }
@@ -290,7 +296,7 @@ void RADIO::broadcast()
 {
   
   //Updates the time object to hold the most current operation time.
-  Network.L_TS = millis();
+  Network.L_TS = millis()/1000.0;
   
   //Updates the Networks struct to reflect the crafts most up-to-date postioning before
   //   it broadcasts the signal on the network.
@@ -303,35 +309,40 @@ void RADIO::broadcast()
   
   //Casting all float values to a character array with commas saved in between values
   //   so the character array can be parsed when received by another craft.
-  char transmission[] = {char(Network.L_TS),
-                         ',',
-                         char(Network.Altitude),
-                         ',',
-                         char(Network.Latitude),
-                         ',',
-                         char(Network.Longitude),
-                         ',',
-                         char(Network.LE),
-                         ',',
-                         char(Network.H_TS),
-                         ',',
-                         char(Network.Release_Status),
-                         ',',
-                         char(Network.MC_TS),
-                         ',',
-                         char(Network.Command_Sent),
-                         ',',
-                         char(Network.Command_Received),
-                         ',',
-                         char(Network.Craft_ID)
-                         };
-	
-	Serial.print("Radio Sending: ");Serial.println(transmission);
+  String temp = "";
   
-	//Sends message passed in as paramter via antenna.
-	rf95.send(transmission, sizeof(transmission));
-		
-	//Pauses all operations until the micro controll has guaranteed the transmission of the
-	//   signal. 
-	rf95.waitPacketSent();
+  temp += Network.L_TS;
+  temp += ",";
+  temp += Network.Altitude;
+  temp += ",";
+  temp += Network.Latitude;
+  temp += ",";
+  temp += Network.Longitude;
+  temp += ",";
+  temp += Network.LE;
+  temp += ",";
+  temp += Network.H_TS;
+  temp += ",";
+  temp += Network.Release_Status;
+  temp += ",";
+  temp += Network.MC_TS;
+  temp += ",";
+  temp += Network.Command_Sent;
+  temp += ",";
+  temp += Network.Command_Received;
+  temp += ",";
+  temp += Network.Craft_ID;
+
+  //Converts from String to char array. 
+  char transmission[temp.length()];
+  temp.toCharArray(transmission, temp.length());
+
+  Serial.println(transmission);
+  
+  //Sends message passed in as paramter via antenna.
+  rf95.send(transmission, sizeof(transmission));
+    
+  //Pauses all operations until the micro controll has guaranteed the transmission of the
+  //   signal. 
+  rf95.waitPacketSent();
 }

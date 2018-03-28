@@ -15,31 +15,31 @@ class RADIO
   RADIO();
   
   //Returns the transmission's Altitude.
-  float getRadioAltitude(uint8_t buf);
+  float getRadioAltitude(char buf[]);
     
   //Returns the transmission's CR variable.
-  float getCommandReceived(uint8_t buf);
+  float getCommandReceived(char buf[]);
   
   //Returns the transmission's CS variable.
-  float getCommandSent(uint8_t buf);
+  float getCommandSent(char buf[]);
     
   //Returns the transmission's craft ID.
-  float getCraftID(uint8_t buf);
+  float getCraftID(char buf[]);
     
   //Returns the transmission's Latitude.
-  float getRadioLatitude(uint8_t buf);
+  float getRadioLatitude(char buf[]);
     
   //Returns the transmission's Longitude.
-  float getRadioLongitude(uint8_t buf);
+  float getRadioLongitude(char buf[]);
     
   //Returns the transmission's Latitude.
-  float getLoRaEvent(uint8_t buf);
+  float getLoRaEvent(char buf[]);
   
   //Returns the transmission's Release Status.
-  float getReleaseStatus(uint8_t buf);
+  float getReleaseStatus(char buf[]);
   
   //Returns the transmission's time stamp.
-  float getTimeStamp(uint8_t buf, int selector);
+  float getTimeStamp(char buf[], int selector);
 	
   //Runs initialzation script for the Radio.
   void initialize();
