@@ -30,20 +30,22 @@ float RADIO::getRadioAltitude(char buf[])
 
 
 /**
- * Parses and returns the radio transmission's Command Received.
+ * Parses and returns the radio transmission's Start or Stop variable.
+ * 0.0 -> pause
+ * 1.0 -> running
  */
-float RADIO::getCommandReceived(char buf[])
+float RADIO::getStartStop(char buf[])
 {
-  return (Data.Parse(buf,9));
+  return (Data.Parse(buf,6));
 }
 
 
 /**
- * Parses and returns the radio transmission's Command Sent.
+ * Parses and returns the radio transmission's targetThrottle
  */
-float RADIO::getCommandSent(char buf[])
+float RADIO::getTargetThrottle(char buf[])
 {
-  return (Data.Parse(buf,8));
+  return (Data.Parse(buf,7));
 }
 
 
@@ -52,7 +54,7 @@ float RADIO::getCommandSent(char buf[])
  */
 float RADIO::getCraftID(char buf[])
 {
-  return (Data.Parse(buf,10));
+  return (Data.Parse(buf,8));
 }
 
 
@@ -95,8 +97,7 @@ float RADIO::getReleaseStatus(char buf[])
 /**
  * Parses and returns the radio transmission's Time Stamp (ms).
  *    LoRa  -> 0
- *    HABET -> 5
- *    MC    -> 7
+ *    MC    -> 5
  */
 float RADIO::getTimeStamp(char buf[], int selector)
 {
@@ -218,11 +219,9 @@ void RADIO::manager()
     //Updates radio state.
     OperationMode = NORMAL;
     OpModeString = "NORMAL";
-    
-    //Serial.println("Sending Start Signal");
-    
+
 		//Does not delay because MS is the first node to broadcast after rollcall is compelted.
-		//delay(0000);
+		delay(NODE_ID * 5000);
 		
 	}
 	//Each of the 2 crafts have 5 seconds to broadcast. That means each craft will broadcast every 10 seconds.
@@ -307,19 +306,6 @@ void RADIO::radioReceive()
       //   down the other nodes varaibles. If the time LoRa currently holds the most updated values
       //   for another node (LoRa's time stamp is higher than the new signal's), it replaces those vars.
       
-      //Reads in the time stamp for HABET's last broadcast.
-      float temp_HABET = Radio.getTimeStamp(toParse, 5);
-      
-      //Compares the currently brought in time stamp to the one stored onboad.
-      if(temp_HABET > Radio.Network.H_TS){
-        
-        //If the incoming signal has more up-to-date versions, we overwrite our saved version with
-        //   the new ones.
-        Network.H_TS = temp_HABET;
-        Network.Release_Status = Radio.getReleaseStatus(toParse);
-        
-      }
-      
       //Reads in the time stamp for Mission Control's last broadcast.
       float temp_LoRa = Radio.getTimeStamp(toParse, 0);
       
@@ -388,15 +374,11 @@ void RADIO::broadcast()
   temp += ",";
   temp += Network.LE;
   temp += ",";
-  temp += Network.H_TS;
-  temp += ",";
-  temp += Network.Release_Status;
-  temp += ",";
   temp += Network.MC_TS;
   temp += ",";
-  temp += Network.Command_Sent;
+  temp += Network.StartStop;
   temp += ",";
-  temp += Network.Command_Received;
+  temp += Network.TargetThrottle;
   temp += ",";
   temp += Network.Craft_ID;
 

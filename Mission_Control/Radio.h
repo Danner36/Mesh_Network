@@ -18,10 +18,10 @@ class RADIO
   float getRadioAltitude(char buf[]);
     
   //Returns the transmission's CR variable.
-  float getCommandReceived(char buf[]);
+  float getStartStop(char buf[]);
   
   //Returns the transmission's CS variable.
-  float getCommandSent(char buf[]);
+  float getTargetThrottle(char buf[]);
     
   //Returns the transmission's craft ID.
   float getCraftID(char buf[]);
@@ -34,9 +34,6 @@ class RADIO
     
   //Returns the transmission's Latitude.
   float getLoRaEvent(char buf[]);
-  
-  //Returns the transmission's Release Status.
-  float getReleaseStatus(char buf[]);
   
   //Returns the transmission's time stamp.
   float getTimeStamp(char buf[], int selector);
@@ -72,6 +69,9 @@ class RADIO
   
   //Reset pin onboard the radio.
   const byte RFM95_RST = 4;
+
+  //Craft ID (Used to set start times)
+  const byte NODE_ID = 1;
 
   //Interrupt pin to trigger RollCall.
   const byte interruptPinRollCall = 3;
@@ -130,29 +130,22 @@ class RADIO
 		float LE = 0.0;
 		
 		/**
-		 * The below varaible is overseen by HABET_Detach.
-		 */
-		
-		//HABET's ms Time stamp.
-		float H_TS = 0.0;
-		
-		//Release status '0' -> not released, '1' -> released.
-		float Release_Status = 0.0;
-		
-		/**
 		 * The last 3 variables are overseen by Mission Control.
 		 */
 		
-		//Mission Control's ms Time stamp.
-		float MC_TS = 0.0;
-		
-		//Command_Sent will be what triggers a command on another craft (Eagle Eye). 
-		float Command_Sent = 0.0;
-		
-		//Command_Received will be turned 1 when the Command_Sent receahes its destination. 
-		//   Used as a handhshake, but primary purpose is to be able to verify that an action 
-		//   reached its destination via Mission Control.
-		float Command_Received = 0.0;
+    //Mission Control's ms Time stamp.
+    float MC_TS = 0.0;
+    
+    //This variable is the on / off switch for the craft as far as operational movement goes.
+    //   Having this be on the off state (0.0) does not stop data collection, only servo and 
+    //   motor movement. 
+    float StartStop = 0.0;
+
+    //Holds the craft's target throttle position. This is not what the craft is current at, 
+    //   but what we want the craft to have its upper limit be. For example, it will not be 
+    //   at a constant 40% if we set it to '40', but it will be able to iter up and down from
+    //   that percentage of thrust. 
+    float TargetThrottle  = 0.0;
 		
 		/**
 		 * This varaible is updated by each craft right before the array is broadcasted.

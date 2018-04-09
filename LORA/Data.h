@@ -48,10 +48,6 @@ class DATA
 		
 		//LoRa Event. This is assigned as needed throughout the program. Signals a specific event.
 		float LE = 0.0;
-		
-		//Mega Event. This is assigned as needed throughout the program. Signals the Mega had a 
-		//   specific event.
-		float ME = 0.0;
 
     //Time of flight. Used for data capture in SD card.
     char Time[10];

@@ -32,14 +32,14 @@ float DATA::Parse(char message[], int objective){
   //
   //Example Radio Transmission. 
   //
-  //                  LORA                              HABET                         MISSION CONTROL                   CRAFT ID
-  //  Time(ms),Altitude,Latitude,Longitude,LE, | Time(ms),Release Status, | Time(ms),Command Sent,Command Received, | Signal Origin
+  //                     LORA                              MISSION CONTROL             CRAFT ID
+  //  Time(ms),Altitude,Latitude,Longitude,LE, | Time(ms),Start_Stop,new_throttle, | Signal Origin
   //
   //Example I2C Transmission
   //
   //                                   CONTROLER ACCESS NETWORK PROTOCOL PACKET
-  //  $,GPSAltitude, Latitude, Longitude, TargetLat, TargetLon, Roll, Pitch, Yaw, Speed , TargetDistance, Time,$
-  //         1           2         3          4           5       6     7     8     9          10          11
+  //  $,GPSAltitude, Latitude, Longitude, TargetLat, TargetLon, Roll, Pitch, Yaw, Speed, TargetDistance, Time,$
+  //         1           2         3          4           5       6     7     8     9         10          11
   //The number of commas that the program needs to pass before it started parsing the data.
   int goalNumber = objective;
   
@@ -107,8 +107,6 @@ float DATA::Parse(char message[], int objective){
  */
 void DATA::displayInfo()
 {
-  //Local.LE and Local.ME update on their own throughout the program & are reset to 0 after being saved.
-
   if(newData == YES){
     //Prints out data struct to the screen for debugging/following along purposes.
     Serial.println("-----------------------------------------------------------------------------");

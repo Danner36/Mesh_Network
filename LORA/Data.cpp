@@ -31,14 +31,14 @@ float DATA::Parse(char message[], int objective){
 	//
 	//Example Radio Transmission. 
 	//
-	//                  LORA                              HABET                         MISSION CONTROL                   CRAFT ID
-	//  Time(ms),Altitude,Latitude,Longitude,LE, | Time(ms),Release Status, | Time(ms),Command Sent,Command Received, | Signal Origin
+	//                     LORA                              MISSION CONTROL             CRAFT ID
+	//  Time(ms),Altitude,Latitude,Longitude,LE, | Time(ms),Start_Stop,new_throttle, | Signal Origin
   //
   //Example I2C Transmission
   //
   //                                   CONTROLLER ACCESS NETWORK PROTOCOL PACKET
-  //  $,GPSAltitude, Latitude, Longitude, TargetLat, TargetLon, Roll, Pitch, Yaw, Speed , TargetDistance, Time,$
-  //         1           2         3          4           5       6     7     8     9          10          11
+  //  $,GPSAltitude, Latitude, Longitude, TargetLat, TargetLon, Roll, Pitch, Yaw, Speed, TargetDistance, Time,$
+  //         1           2         3          4           5       6     7     8     9         10          11
 	//The number of commas that the program needs to pass before it started parsing the data.
 	//  parameter objective ^^^
   
@@ -117,6 +117,5 @@ void DATA::displayInfo()
 	//Serial.print("Sat Count:  ");    Serial.println(Local.SatCount);
   //Serial.print("Distance:   ");    Serial.print(Local.TargetDistance); Serial.println(" m");
 	//Serial.print("LoRa Event: ");    Serial.println(Local.LE);
-	//Serial.print("Mega Event: ");    Serial.println(Local.ME);
 	//Serial.println("-------------------------------------------");
 }
