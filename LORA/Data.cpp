@@ -5,6 +5,7 @@
 
 #include <Arduino.h>
 #include "Data.h"
+#include "Radio.h"
 //#include "GPS.h"
 #include <stdlib.h>
 #include "Globals.h"
@@ -106,16 +107,36 @@ float DATA::Parse(char message[], int objective){
  */
 void DATA::displayInfo()
 {
-	//Local.LE and Local.ME update on their own throughout the program & are reset to 0 after being saved.
-
-	//Prints out data struct to the screen for debugging/following along purposes.
-  //Serial.print("Time:       ");    Serial.println(Local.Time);
-	//Serial.print("Altitude:   ");    Serial.print(Local.Altitude);       Serial.println(" m");
-	//Serial.print("Latitude:   ");    Serial.println(Local.Latitude,6);
-	//Serial.print("Longitude:  ");    Serial.println(Local.Longitude,6);
-  //Serial.print("Speed:      ");    Serial.println(Local.Speed);
-	//Serial.print("Sat Count:  ");    Serial.println(Local.SatCount);
-  //Serial.print("Distance:   ");    Serial.print(Local.TargetDistance); Serial.println(" m");
-	//Serial.print("LoRa Event: ");    Serial.println(Local.LE);
-	//Serial.println("-------------------------------------------");
+  if(newData == YES){
+    //Prints out data struct to the screen for debugging/following along purposes.
+    Serial.println("-----------------------------------------------------------------------------");
+    Serial.println("-----------------------------------------------------------------------------");
+    Serial.println("-----------------------------------------------------------------------------");
+    Serial.println("|                                Craft Data                                 |");
+    Serial.println("|                                                                           |");
+    Serial.print(  "|  Received: ");  Serial.print(Radio.radioInput);  Serial.println("");
+    Serial.print(  "|  Sent: ");      Serial.print(Radio.radioOutput); Serial.println("");
+    Serial.println("|                                                                           |");
+    Serial.println("-----------------------------------------------------------------------------");
+    Serial.println("|                                                                           |");
+    Serial.print(  "|  Lora Time Stamp:  "); Serial.print(Radio.Network.L_TS);  Serial.println("\t\t\t\t\t\t    |");
+    Serial.print(  "|  Altitude:   "); Serial.print(Radio.Network.Altitude);    Serial.print(" m"); Serial.println("\t\t\t\t\t\t    |");
+    Serial.print(  "|  Latitude:   "); Serial.print(Radio.Network.Latitude,6);  Serial.println("\t\t\t\t\t\t    |");
+    Serial.print(  "|  Longitude:  "); Serial.print(Radio.Network.Longitude,6); Serial.println("\t\t\t\t\t\t    |");
+    Serial.print(  "|  LoRa Event: "); Serial.print(Radio.Network.LE);          Serial.println("\t\t\t\t\t\t\t    |");
+    Serial.println("|                                                                           |");
+    Serial.println("-----------------------------------------------------------------------------");
+    Serial.println("|                                                                           |");
+    Serial.print(  "|  Mission Control Time Stamp: "); Serial.print(Radio.Network.MC_TS);          Serial.println("\t\t\t\t\t    |");
+    Serial.print(  "|  Operational Status: ");         Serial.print(Radio.getSTATE());             Serial.println("\t\t\t\t\t\t    |");
+    Serial.print(  "|  Target Throttle: ");            Serial.print(Radio.Network.TargetThrottle); Serial.println("\t\t\t\t\t\t    |");
+    Serial.println("|                                                                           |");
+    Serial.println("-----------------------------------------------------------------------------");
+    Serial.print(  "|  Received ID:  ");  Serial.print(Radio.receivedID); Serial.println("\t\t\t\t\t\t\t    |");
+    Serial.println("-----------------------------------------------------------------------------");
+  
+    
+    //Resets the newData state to no new data.
+    Data.newData = Data.NO;
+  }
 }

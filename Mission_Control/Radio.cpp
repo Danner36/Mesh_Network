@@ -63,7 +63,7 @@ float RADIO::getCraftID(char buf[])
  */
 float RADIO::getRadioLatitude(char buf[])
 {
-  return (Data.Parse(buf,2));
+  return (Data.Parse(buf,2)) / 10000.0;
 }
 
 
@@ -72,7 +72,7 @@ float RADIO::getRadioLatitude(char buf[])
  */
 float RADIO::getRadioLongitude(char buf[])
 {
-  return (Data.Parse(buf,3));
+  return (Data.Parse(buf,3)) / 10000.0;
 }
 
 
@@ -82,15 +82,6 @@ float RADIO::getRadioLongitude(char buf[])
 float RADIO::getLoRaEvent(char buf[])
 {
   return (Data.Parse(buf,4));
-}
-
-
-/**
- * Parses and returns the radio transmission's Release Status.
- */
-float RADIO::getReleaseStatus(char buf[])
-{
-  return (Data.Parse(buf,6));
 }
 
 
@@ -200,7 +191,6 @@ void RADIO::manager()
     //   This is needed because it allows the program to run in RollCall mode without
     //   being directly triggered, while checking for RollCall responses. 
     else{
-
       //Calls function. 
       Radio.rollCall();
     }
@@ -219,9 +209,6 @@ void RADIO::manager()
     //Updates radio state.
     OperationMode = NORMAL;
     OpModeString = "NORMAL";
-
-		//Does not delay because MS is the first node to broadcast after rollcall is compelted.
-		delay(NODE_ID * 5000);
 		
 	}
 	//Each of the 2 crafts have 5 seconds to broadcast. That means each craft will broadcast every 10 seconds.
@@ -235,7 +222,7 @@ void RADIO::manager()
 		Radio.broadcast();
 
     if(Network.Craft_ID == 555.5){
-      delay(500);
+      delay(250);
       Network.Craft_ID = 1.0;
       Radio.broadcast();
     }
@@ -249,25 +236,22 @@ void RADIO::manager()
 void RADIO::nodeCheckIn()
 {
   //Checks for response from node after rollcall broadcast.
-  if(receivedID != 0){
+  if(receivedID != 0.0){
 
     //Cycles through nodes that have already checked in.
-    int i = 0;
-    while(i<10){
-
-      //Compares current ID to the nodes that have already checked in. 
-      if(nodeList[i] == 0.0 && nodeList[i] != receivedID){
-
+    for(int i=0;i<10;i++){
+      if(nodeList[i] == receivedID){
+        break;
+      }
+      else if(nodeList[i] == 0.0){
         //New info is being read in. 
         Data.newData = Data.YES;
       
         //If not found and an empty spot is found, it adds the node to the network. 
         nodeList[i] = receivedID;
-
+        
         break;
       }
-
-      i++;
     }
   }
 }
@@ -291,7 +275,7 @@ void RADIO::radioReceive()
 
       //New info is being read in. 
       Data.newData = Data.YES;
-        
+      
       //Used to display the received data in the GUI.
       radioInput = buf;
 
@@ -355,10 +339,9 @@ void RADIO::rollCall()
  * Creates an array to be sent out via Radio. Fills that array with correct values and returns it.
  */
 void RADIO::broadcast()
-{
-  
-	//Updates the time object to hold the most current operation time.
-	Network.MC_TS = millis()/1000.0;
+{  
+  //Updates the time object to hold the most current operation time.
+  Network.MC_TS = millis()/1000.0;
 	
   //Casting all float values to a character array with commas saved in between values
   //   so the character array can be parsed when received by another craft.
@@ -416,4 +399,19 @@ void RADIO::blinkLED(){
 
   //OFF
   digitalWrite(LED, LOW);
+}
+
+
+/**
+ * Returns the operational state of the craft in string format for UI and debugging. 
+ */
+String RADIO::getSTATE(){
+  float temp = Radio.Network.StartStop;
+
+  if(temp == 0.0){
+    return "Paused";
+  }
+  else if(temp == 1.0){
+    return "Running";
+  }
 }

@@ -21,7 +21,17 @@ class DATA
 	void displayInfo();
 	
 	
-	
+
+  //State of Data.
+  //   This enum is used in the UI display process. It will watch all the variables
+  //   and if any have changed compared to the last cycle, it will switch to yes. 
+  //   When it is in the YES state, the displayInfo() method will print out the newly
+  //   accuried data to the serial monitor. The purpose of this is have a readable UI
+  //   without having it update every few milliseconds. (Potential future solution is
+  //   would be to use an external terminal such as Putty)
+  enum dataState {NO, YES};
+  enum dataState newData = YES; //Starts in Yes to the intial UI. 
+  
 	//Stores all of Eagle Eye's current flight data.
 	//   The difference between this struct and the one initalized in Radio.h is that this information
 	//   is saves gathered/used/saved locally. The Radio.h struct holds all the network information

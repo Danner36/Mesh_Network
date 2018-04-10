@@ -86,15 +86,6 @@ float RADIO::getLoRaEvent(char buf[])
 
 
 /**
- * Parses and returns the radio transmission's Release Status.
- */
-float RADIO::getReleaseStatus(char buf[])
-{
-	return (Data.Parse(buf,6));
-}
-
-
-/**
  * Parses and returns the radio transmission's Time Stamp (ms).
  *    LoRa  -> 0
  *    MC    -> 5
@@ -166,45 +157,38 @@ void RADIO::initialize()
  * Manages all radio comms either incoming or outgoing.
  */
 void RADIO::manager()
-{
+{ 
+  //Updates the time object to hold the most current operation time.
+  Network.L_TS = millis()/1000.0;
   
 	//Reads in radio transmission if available.
 	Radio.radioReceive();
  
 	//Checks for a specific Craft ID. '999.9' signals the start of operation.
 	if(receivedID == 999.0 && !Radio.checkedIn){
-
-    Serial.println("Rollcall enabled");
+    
 		//Responds to Mission Control with the correct ID to signal this node is here and listening.
 		Radio.rollCall();
-		
 	}
  
 	//After Roll Call is complete, Mission Control will broadcast the start signal. Appropriate delays are
 	//   distributed below to initally sync the network to a 5 second split. This makes for a 15 second revolution.
 	//   
 	//   MS - starts instantly
-	//   HABET - delays .. seconds  <- NOT CURRENTLY INCLUDED.
 	//   EE - delays 5 seconds
 	else if(receivedID == 555.5){
-
-    Serial.println("Recieved start signal");
     
 		//Delays 5 seconds.
-		delay(NODE_ID * 1000);
+		delay(5000);
     
     //Starts the broadcasting timer.
     start = millis();
-		
 	}
-	//Each of the 3 crafts have 5 seconds to broadcast. That means each craft will broadcast every 15 seconds.
-	//   15000 milliseconds = 15 seconds.
-	else if((millis() - start >= 15000) && startSignal){
-
-    Serial.println("normal broadcast");
+	//Each of the crafts have 5 seconds to broadcast.
+	else if(millis() - start >= 10000){
+    
 		//Resets the counter. This disables broadcasting again until 15 seconds has passed.
 		start = millis();
-		
 		//Sends the transmission via radio.
 		Radio.broadcast();
 	}
@@ -227,12 +211,17 @@ void RADIO::radioReceive()
       
     //Reads in the avaiable radio transmission, then checks if it is corrupt or complete.
     if(rf95.recv(buf, &len)) {
-
+      //New info is being read in. 
+      Data.newData = Data.YES;
+  
       //Conversion from uint8_t to string. The purpose of this is to be able to convert to an 
       //   unsigned char array for parsing. 
       String str = (char*)buf;
       char toParse[str.length()];
       str.toCharArray(toParse,str.length());
+
+      //Used to display the received data in the GUI.
+      radioInput = buf;
       
       //This whole section is comparing the currently held varaibles from the last radio update
       //   to that of the newly received signal. Updates the craft's owned variables and copies
@@ -255,7 +244,6 @@ void RADIO::radioReceive()
 
       //Reads in Craft ID to see where signal came from. 
       receivedID = Radio.getCraftID(toParse);
-      Serial.print("ID: "); Serial.println(receivedID);
     }
 	}
 }
@@ -271,7 +259,7 @@ void RADIO::rollCall()
 	
 	//Sends the transmission via radio.
 	Radio.broadcast();
-	Serial.println("Check in sent");
+	//Serial.println("Check in sent");
 	//Updates Checked_In Status.
 	checkedIn = true;
 }
@@ -282,7 +270,6 @@ void RADIO::rollCall()
  */
 void RADIO::broadcast()
 {
-  
   //Updates the time object to hold the most current operation time.
   Network.L_TS = millis()/1000.0;
   
@@ -303,9 +290,11 @@ void RADIO::broadcast()
   temp += ",";
   temp += Network.Altitude;
   temp += ",";
-  temp += Network.Latitude;
+  temp += Network.Latitude * 10000; //In order to pass more then 2 decimals, we multiply by 10000
+                                    //on this end to preserve the wanted 6 bits (4 before, 2 after)
   temp += ",";
-  temp += Network.Longitude;
+  temp += Network.Longitude * 10000; //In order to pass more then 2 decimals, we multiply by 10000
+                                     //on this end to preserve the wanted 6 bits (4 before, 2 after)
   temp += ",";
   temp += Network.LE;
   temp += ",";
@@ -317,11 +306,15 @@ void RADIO::broadcast()
   temp += ",";
   temp += Network.Craft_ID;
 
+  //Copy contents. 
+  radioOutput = temp;
+
+  //New info is being read in. 
+  Data.newData = Data.YES;
+  
   //Converts from String to char array. 
   char transmission[temp.length()];
   temp.toCharArray(transmission, temp.length());
-
-  Serial.println(transmission);
   
   //Sends message passed in as paramter via antenna.
   rf95.send(transmission, sizeof(transmission));
@@ -329,4 +322,19 @@ void RADIO::broadcast()
   //Pauses all operations until the micro controll has guaranteed the transmission of the
   //   signal. 
   rf95.waitPacketSent();
+}
+
+
+/**
+ * Returns the operational state of the craft in string format for UI and debugging. 
+ */
+String RADIO::getSTATE(){
+  float temp = Radio.Network.StartStop;
+
+  if(temp == 0.0){
+    return "Paused";
+  }
+  else if(temp == 1.0){
+    return "Running";
+  }
 }

@@ -55,9 +55,6 @@ void loop(){
 
   //Displays current information of craft.
   Data.displayInfo();
-
-  //Resets the newData state to no new data.
-  Data.newData = Data.NO;
   
-  delay(40);
+  delay(10);
 }

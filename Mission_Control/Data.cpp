@@ -114,34 +114,38 @@ void DATA::displayInfo()
     Serial.println("-----------------------------------------------------------------------------");
     Serial.println("|                                Craft Data                                 |");
     Serial.println("|                                                                           |");
-    Serial.print(  "|  Network Nodes: "); Data.printNodes();                      Serial.println("\t\t\t\t\t\t\t    |");
+    Serial.print(  "|  Network Nodes: "); Data.printNodes();           Serial.println("\t\t\t\t\t\t\t    |");
     Serial.println("|                                                                           |");
-    Serial.print(  "|  Received: ");         Serial.print(Radio.radioInput);      Serial.println("");
-    Serial.print(  "|  Sent: ");             Serial.print(Radio.radioOutput);     Serial.println("");
-    Serial.println("|                                                                           |");
-    Serial.println("-----------------------------------------------------------------------------");
-    Serial.println("|                                                                           |");
-    Serial.print(  "|  Operation Mode: ");   Serial.print(Radio.OpModeString);    Serial.println("\t\t\t\t\t\t    |");
-    Serial.print(  "|  Roll Call Status: "); Serial.print(Radio.RCString);        Serial.println("\t\t\t\t\t\t    |");
-    Serial.print(  "|  Keypad Press: ");     Serial.print(Key.pressedKey);        Serial.println("\t\t\t\t\t\t\t    |");
+    Serial.print(  "|  Received: ");  Serial.print(Radio.radioInput);  Serial.println("");
+    Serial.print(  "|  Sent: ");      Serial.print(Radio.radioOutput); Serial.println("");
     Serial.println("|                                                                           |");
     Serial.println("-----------------------------------------------------------------------------");
     Serial.println("|                                                                           |");
-    Serial.print(  "|  Lora Time Stamp:  "); Serial.print(Radio.Network.L_TS);    Serial.println("\t\t\t\t\t\t    |");
-    Serial.print(  "|  Altitude:   "); Serial.print(Radio.Network.Altitude);      Serial.print(" m");  Serial.println("\t\t\t\t\t\t\t    |");
-    Serial.print(  "|  Latitude:   "); Serial.print(Radio.Network.Latitude,6);    Serial.println("\t\t\t\t\t\t\t    |");
-    Serial.print(  "|  Longitude:  "); Serial.print(Radio.Network.Longitude,6);   Serial.println("\t\t\t\t\t\t\t    |");
-    Serial.print(  "|  LoRa Event: "); Serial.print(Radio.Network.LE);            Serial.println("\t\t\t\t\t\t\t    |");
+    Serial.print(  "|  Operation Mode: ");   Serial.print(Radio.OpModeString); Serial.println("\t\t\t\t\t\t    |");
+    Serial.print(  "|  Roll Call Status: "); Serial.print(Radio.RCString);     Serial.println("\t\t\t\t\t\t    |");
+    Serial.print(  "|  Keypad Press: ");     Serial.print(Key.pressedKey);     Serial.println("\t\t\t\t\t\t\t    |");
     Serial.println("|                                                                           |");
     Serial.println("-----------------------------------------------------------------------------");
     Serial.println("|                                                                           |");
-    Serial.print(  "|  Mission Control Time Stamp: "); Serial.print(Radio.Network.MC_TS);     Serial.println("\t\t\t\t\t    |");
-    Serial.print(  "|  Command Sent: ");       Serial.print(Radio.Network.Command_Sent);      Serial.println("\t\t\t\t\t\t\t    |");
-    Serial.print(  "|  Command Received: ");   Serial.print(Radio.Network.Command_Received);  Serial.println("\t\t\t\t\t\t    |");
+    Serial.print(  "|  Lora Time Stamp:  "); Serial.print(Radio.Network.L_TS);  Serial.println("\t\t\t\t\t\t    |");
+    Serial.print(  "|  Altitude:   "); Serial.print(Radio.Network.Altitude);    Serial.print(" m"); Serial.println("\t\t\t\t\t\t\t    |");
+    Serial.print(  "|  Latitude:   "); Serial.print(Radio.Network.Latitude,6);  Serial.println("\t\t\t\t\t\t\t    |");
+    Serial.print(  "|  Longitude:  "); Serial.print(Radio.Network.Longitude,6); Serial.println("\t\t\t\t\t\t\t    |");
+    Serial.print(  "|  LoRa Event: "); Serial.print(Radio.Network.LE);          Serial.println("\t\t\t\t\t\t\t    |");
     Serial.println("|                                                                           |");
     Serial.println("-----------------------------------------------------------------------------");
-    Serial.print(  "|  Received ID:  ");     Serial.print(Radio.receivedID);    Serial.println("\t\t\t\t\t\t\t    |");
+    Serial.println("|                                                                           |");
+    Serial.print(  "|  Mission Control Time Stamp: "); Serial.print(Radio.Network.MC_TS);          Serial.println("\t\t\t\t\t    |");
+    Serial.print(  "|  Operational Status: ");         Serial.print(Radio.getSTATE());             Serial.println("\t\t\t\t\t\t\t    |");
+    Serial.print(  "|  Target Throttle: ");            Serial.print(Radio.Network.TargetThrottle); Serial.println("\t\t\t\t\t\t    |");
+    Serial.println("|                                                                           |");
     Serial.println("-----------------------------------------------------------------------------");
+    Serial.print(  "|  Received ID:  ");  Serial.print(Radio.receivedID); Serial.println("\t\t\t\t\t\t\t    |");
+    Serial.println("-----------------------------------------------------------------------------");
+  
+    
+    //Resets the newData state to no new data.
+    Data.newData = Data.NO;
   }
 }
 

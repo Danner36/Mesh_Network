@@ -58,6 +58,9 @@ class RADIO
 
   //Compares current node against others. Prevents duplicates. 
   void nodeCheckIn();
+
+  //Returns craft operational state in string format for UI. 
+  String getSTATE();
 	
 	
   

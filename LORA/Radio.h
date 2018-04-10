@@ -55,7 +55,9 @@ class RADIO
 
   //Blinks the LED on the LoRa uC to show a signal has been received.
   void blinkLED();
-	
+
+  //Returns craft operational state in string format for UI. 
+  String getSTATE();
 	
 	
 	
@@ -77,11 +79,14 @@ class RADIO
 	//Status of the craft replying to Mission Control with its node #.
 	bool checkedIn = false;
 
-  //Status of Start singal. True is recevied. False if not. 
-  bool startSignal = false;
-
   //Holds the ID of the craft that just broadcasted.  
   float receivedID = 0.0;
+
+  //Holds the current received radio signal. 
+  String radioInput = "";
+
+  //Holds the current sent radio signal.
+  String radioOutput = "";
 
 	
 	//Stores all information related to the network of the Eagle Eye program.
