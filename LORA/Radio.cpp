@@ -166,6 +166,10 @@ void RADIO::manager()
  
 	//Checks for a specific Craft ID. '999.9' signals the start of operation.
 	if(receivedID == 999.0 && !Radio.checkedIn){
+
+    //Updates crafts states.
+    RCstate = RUNNING;
+    OperationMode = ROLLCALL;
     
 		//Responds to Mission Control with the correct ID to signal this node is here and listening.
 		Radio.rollCall();
@@ -176,7 +180,7 @@ void RADIO::manager()
 	//   
 	//   MS - starts instantly
 	//   EE - delays 5 seconds
-	else if(receivedID == 555.5){
+	else if((receivedID == 555.5) && (OperationMode == STANDBY) && (RCstate == COMPLETE)){
     
 		//Delays 5 seconds.
 		delay(5000);
@@ -185,10 +189,11 @@ void RADIO::manager()
     start = millis();
 	}
 	//Each of the crafts have 5 seconds to broadcast.
-	else if(millis() - start >= 10000){
+	else if((millis() - start >= 10000) && (OperationMode == NORMAL) && (RCstate == COMPLETE)){
     
 		//Resets the counter. This disables broadcasting again until 15 seconds has passed.
 		start = millis();
+   
 		//Sends the transmission via radio.
 		Radio.broadcast();
 	}
@@ -200,7 +205,6 @@ void RADIO::manager()
  */
 void RADIO::radioReceive()
 {
-
   //Checks if radio message has been received.
   if (rf95.available()){
   	//Creates a temporary varaible to read in the incoming transmission. 
@@ -259,9 +263,13 @@ void RADIO::rollCall()
 	
 	//Sends the transmission via radio.
 	Radio.broadcast();
-	//Serial.println("Check in sent");
+  
 	//Updates Checked_In Status.
 	checkedIn = true;
+
+  //Updates craft states. 
+  RCstate == COMPLETE;
+  OperationMode == STANDBY;
 }
 
 

@@ -171,7 +171,7 @@ void RADIO::manager()
       OperationMode = ROLLCALL;
       OpModeString = "ROLLCALL";
 
-      //Calls function. 
+      //Calls function.
       Radio.rollCall();
     }
     
@@ -221,8 +221,10 @@ void RADIO::manager()
 		//Sends the transmission via radio.
 		Radio.broadcast();
 
+    //Upon first switching to normal operating mode. We have to pulse the start signal (the broadcast above)
+    //   and then pulse the first packet. 
     if(Network.Craft_ID == 555.5){
-      delay(250);
+      delay(100);
       Network.Craft_ID = 1.0;
       Radio.broadcast();
     }

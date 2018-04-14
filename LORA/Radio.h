@@ -88,7 +88,17 @@ class RADIO
   //Holds the current sent radio signal.
   String radioOutput = "";
 
-	
+	//State of Radio program. 
+  //   ROLLCALL - Currently in RollCall process. 
+  //   STANDBY  - RollCall completed, waiting for user to send out start signal. 
+  //   NORMAL   - Radio is running in its normal operation state. 
+  enum RadioStatus {NONE, ROLLCALL, STANDBY, NORMAL};
+  enum RadioStatus OperationMode = NONE;
+
+  //State of RollCall.
+  enum rollCallStatus {NOTSTARTED, RUNNING, COMPLETE};
+  enum rollCallStatus RCstate = NOTSTARTED;
+  
 	//Stores all information related to the network of the Eagle Eye program.
 	//   This struct reads specific indexes and than rebroadcasts the updated transmission to
 	//   the other nodes in the network. 
