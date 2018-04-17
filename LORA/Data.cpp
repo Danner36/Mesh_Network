@@ -115,7 +115,12 @@ void DATA::displayInfo()
     Serial.println("|                                Craft Data                                 |");
     Serial.println("|                                                                           |");
     Serial.print(  "|  Received: ");  Serial.print(Radio.radioInput);  Serial.println("");
-    Serial.print(  "|  Sent: ");      Serial.print(Radio.radioOutput); Serial.println("");
+    Serial.print(  "|  Sent:     ");  Serial.print(Radio.radioOutput); Serial.println("");
+    Serial.println("|                                                                           |");
+    Serial.println("-----------------------------------------------------------------------------");
+    Serial.println("|                                                                           |");
+    Serial.print(  "|  Operation Mode:   "); Serial.print(Radio.getOpSTATE()); Serial.println("\t\t\t\t\t\t    |");
+    Serial.print(  "|  Roll Call Status: "); Serial.print(Radio.getRCSTATE()); Serial.println("\t\t\t\t\t\t    |");
     Serial.println("|                                                                           |");
     Serial.println("-----------------------------------------------------------------------------");
     Serial.println("|                                                                           |");
@@ -128,7 +133,7 @@ void DATA::displayInfo()
     Serial.println("-----------------------------------------------------------------------------");
     Serial.println("|                                                                           |");
     Serial.print(  "|  Mission Control Time Stamp: "); Serial.print(Radio.Network.MC_TS);          Serial.println("\t\t\t\t\t    |");
-    Serial.print(  "|  Operational Status: ");         Serial.print(Radio.getSTATE());             Serial.println("\t\t\t\t\t\t    |");
+    Serial.print(  "|  Operational Status: ");         Serial.print(Radio.getFunctionalSTATE());   Serial.println("\t\t\t\t\t\t    |");
     Serial.print(  "|  Target Throttle: ");            Serial.print(Radio.Network.TargetThrottle); Serial.println("\t\t\t\t\t\t    |");
     Serial.println("|                                                                           |");
     Serial.println("-----------------------------------------------------------------------------");
@@ -140,3 +145,4 @@ void DATA::displayInfo()
     Data.newData = Data.NO;
   }
 }
+

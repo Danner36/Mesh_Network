@@ -56,8 +56,14 @@ class RADIO
   //Blinks the LED on the LoRa uC to show a signal has been received.
   void blinkLED();
 
+  //Returns craft movement state in string format for UI. 
+  String getFunctionalSTATE();
+
   //Returns craft operational state in string format for UI. 
-  String getSTATE();
+  String getOpSTATE();
+
+  //Returns craft Rollcall state in string format for UI. 
+  String getRCSTATE();
 	
 	
 	
@@ -151,3 +157,4 @@ class RADIO
 };
 
 #endif
+

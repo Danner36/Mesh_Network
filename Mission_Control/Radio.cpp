@@ -204,7 +204,7 @@ void RADIO::manager()
 	else if((RCstate == COMPLETE) && (Key.pressedKey == 7 && OperationMode == STANDBY)){
 
     //Updates Craft_ID to the network start signal. 
-    Radio.Network.Craft_ID = 555.5;
+    Radio.Network.Craft_ID = 555.0;
 
     //Updates radio state.
     OperationMode = NORMAL;
@@ -212,7 +212,6 @@ void RADIO::manager()
 		
 	}
 	//Each of the 2 crafts have 5 seconds to broadcast. That means each craft will broadcast every 10 seconds.
-	//   15000milliseconds = 15 seconds.
 	else if((millis() - start >= 10000) && (RCstate == COMPLETE) && (OperationMode == NORMAL)){
 		
 		//Resets the counter. This disabled broadcasting agian until 10 seconds has passed.
@@ -223,7 +222,7 @@ void RADIO::manager()
 
     //Upon first switching to normal operating mode. We have to pulse the start signal (the broadcast above)
     //   and then pulse the first packet. 
-    if(Network.Craft_ID == 555.5){
+    if(Network.Craft_ID == 555.0){
       delay(100);
       Network.Craft_ID = 1.0;
       Radio.broadcast();
@@ -280,6 +279,7 @@ void RADIO::radioReceive()
       
       //Used to display the received data in the GUI.
       radioInput = buf;
+      Serial.println(radioInput);
 
       //Conversion from uint8_t to string. The purpose of this is to be able to convert to an 
       //   unsigned char array for parsing. 
@@ -353,9 +353,9 @@ void RADIO::broadcast()
   temp += ",";
   temp += Network.Altitude;
   temp += ",";
-  temp += Network.Latitude;
+  temp += Network.Latitude * 10000;
   temp += ",";
-  temp += Network.Longitude;
+  temp += Network.Longitude * 10000;
   temp += ",";
   temp += Network.LE;
   temp += ",";

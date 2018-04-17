@@ -63,7 +63,7 @@ float RADIO::getCraftID(char buf[])
  */
 float RADIO::getRadioLatitude(char buf[])
 {
-	return (Data.Parse(buf,2));
+  return (Data.Parse(buf,2)) / 10000.0;
 }
 
 
@@ -72,9 +72,8 @@ float RADIO::getRadioLatitude(char buf[])
  */
 float RADIO::getRadioLongitude(char buf[])
 {
-	return (Data.Parse(buf,3));
+  return (Data.Parse(buf,3)) / 10000.0;
 }
-
 
 /**
  * Parses and returns the radio transmission's LoRa Event.
@@ -158,9 +157,6 @@ void RADIO::initialize()
  */
 void RADIO::manager()
 { 
-  //Updates the time object to hold the most current operation time.
-  Network.L_TS = millis()/1000.0;
-  
 	//Reads in radio transmission if available.
 	Radio.radioReceive();
  
@@ -172,28 +168,31 @@ void RADIO::manager()
     OperationMode = ROLLCALL;
     
 		//Responds to Mission Control with the correct ID to signal this node is here and listening.
+    delay(100);
 		Radio.rollCall();
 	}
  
 	//After Roll Call is complete, Mission Control will broadcast the start signal. Appropriate delays are
-	//   distributed below to initally sync the network to a 5 second split. This makes for a 15 second revolution.
+	//   distributed below to initally sync the network to a 5 second split. This makes for a 10 second revolution.
 	//   
 	//   MS - starts instantly
 	//   EE - delays 5 seconds
-	else if((receivedID == 555.5) && (OperationMode == STANDBY) && (RCstate == COMPLETE)){
+	else if((receivedID == 555.0) && (OperationMode == STANDBY) && (RCstate == COMPLETE)){
     
 		//Delays 5 seconds.
 		delay(5000);
     
     //Starts the broadcasting timer.
     start = millis();
+
+    OperationMode = NORMAL;
 	}
 	//Each of the crafts have 5 seconds to broadcast.
-	else if((millis() - start >= 10000) && (OperationMode == NORMAL) && (RCstate == COMPLETE)){
-    
+	else if((millis() - start > 10000) && (OperationMode == NORMAL) && (RCstate == COMPLETE)){
+
 		//Resets the counter. This disables broadcasting again until 15 seconds has passed.
 		start = millis();
-   
+    
 		//Sends the transmission via radio.
 		Radio.broadcast();
 	}
@@ -268,8 +267,8 @@ void RADIO::rollCall()
 	checkedIn = true;
 
   //Updates craft states. 
-  RCstate == COMPLETE;
-  OperationMode == STANDBY;
+  RCstate = COMPLETE;
+  OperationMode = STANDBY;
 }
 
 
@@ -334,9 +333,9 @@ void RADIO::broadcast()
 
 
 /**
- * Returns the operational state of the craft in string format for UI and debugging. 
+ * Returns the movement state of the craft in string format for UI and debugging. 
  */
-String RADIO::getSTATE(){
+String RADIO::getFunctionalSTATE(){
   float temp = Radio.Network.StartStop;
 
   if(temp == 0.0){
@@ -346,3 +345,43 @@ String RADIO::getSTATE(){
     return "Running";
   }
 }
+
+
+/**
+ * Returns the operational state of the craft in string format for UI and debugging. 
+ */
+String RADIO::getOpSTATE(){
+  float temp = Radio.OperationMode;
+
+  if(temp == 0.0){
+    return "NONE";
+  }
+  else if(temp == 1.0){
+    return "ROLLCALL";
+  }
+  else if(temp == 2.0){
+    return "STANDBY";
+  }
+  else if(temp == 3.0){
+    return "NORMAL";
+  }
+}
+
+
+/**
+ * Returns the rollcall state of the craft in string format for UI and debugging. 
+ */
+String RADIO::getRCSTATE(){
+  float temp = Radio.RCstate;
+
+  if(temp == 0.0){
+    return "NOTSTARTED";
+  }
+  else if(temp == 1.0){
+    return "RUNNING";
+  }
+  else if(temp == 2.0){
+    return "COMPLETE";
+  }
+}
+
