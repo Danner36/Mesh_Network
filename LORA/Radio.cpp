@@ -54,7 +54,7 @@ float RADIO::getTargetThrottle(char buf[])
  */
 float RADIO::getCraftID(char buf[])
 {
-	return (Data.Parse(buf,8));
+	return (Data.Parse(buf,10));
 }
 
 
@@ -81,6 +81,24 @@ float RADIO::getRadioLongitude(char buf[])
 float RADIO::getLoRaEvent(char buf[])
 {
 	return (Data.Parse(buf,4));
+}
+
+
+/**
+ * Parses and returns the radio Target Latitude.
+ */
+float RADIO::getRadioTargetLat(char buf[])
+{
+  return (Data.Parse(buf,8)) / 10000.0;
+}
+
+
+/**
+ * Parses and returns the radio Target Longitude.
+ */
+float RADIO::getRadioTargetLon(char buf[])
+{
+  return (Data.Parse(buf,9)) / 10000.0;
 }
 
 
@@ -177,15 +195,14 @@ void RADIO::manager()
 	//   
 	//   MS - starts instantly
 	//   EE - delays 5 seconds
-	else if((receivedID == 555.0) && (OperationMode == STANDBY) && (RCstate == COMPLETE)){
-    
-		//Delays 5 seconds.
-		delay(5000);
-    
-    //Starts the broadcasting timer.
-    start = millis();
+	else if((OperationMode == STANDBY) && (RCstate == COMPLETE)){
 
-    OperationMode = NORMAL;
+    if(receivedID == 555.0){
+      //Delays 5 seconds.
+      delay(5000);
+
+      OperationMode = NORMAL;
+    }
 	}
 	//Each of the crafts have 5 seconds to broadcast.
 	else if((millis() - start > 10000) && (OperationMode == NORMAL) && (RCstate == COMPLETE)){
@@ -242,6 +259,8 @@ void RADIO::radioReceive()
         //   the new ones.
         Network.MC_TS = tempMC;
         Network.StartStop = Radio.getStartStop(toParse);
+        Network.TargetLat = Radio.getRadioTargetLat(toParse);
+        Network.TargetLon = Radio.getRadioTargetLon(toParse);
         Network.TargetThrottle = Radio.getTargetThrottle(toParse);
       }
 
@@ -308,6 +327,10 @@ void RADIO::broadcast()
   temp += Network.MC_TS;
   temp += ",";
   temp += Network.StartStop;
+  temp += ",";
+  temp += Network.TargetLat * 10000;
+  temp += ",";
+  temp += Network.TargetLon * 10000;
   temp += ",";
   temp += Network.TargetThrottle;
   temp += ",";

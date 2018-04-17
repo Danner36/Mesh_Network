@@ -64,8 +64,15 @@ class RADIO
 
   //Returns craft Rollcall state in string format for UI. 
   String getRCSTATE();
+  
+  //Parses and returns the radio Target Latitude.
+  float getRadioTargetLat(char buf[]);
+
+  //Parses and returns the radio Target Latitude.
+  float getRadioTargetLon(char buf[]);
 	
-	
+
+  
 	
 	//Chip select pin for the radio.
 	const byte RFM95_CS = 8;
@@ -133,11 +140,17 @@ class RADIO
     //   motor movement. 
 		float StartStop = 0.0;
 
-    //Holds the craft's target throttle position. This is not what the craft is current at, 
-    //   but what we want the craft to have its upper limit be. For example, it will not be 
-    //   at a constant 40% if we set it to '40', but it will be able to iter up and down from
+    //User inputted target latitude for the craft. 
+    float TargetLat = 0.0;
+
+    //User inputted target longitude for the craft. 
+    float TargetLon = 0.0;
+
+    //Holds the craft's target throttle position. This is not what the craft is currently at, 
+    //   but what we want the craft's to have its upper limit be. For example, it will not be 
+    //   at a constant 40% if we set it to '40.0', but it will be able to iterate up and down from
     //   that percentage of thrust. 
-    float TargetThrottle  = 0.0;
+    float TargetThrottle = 0.0;
     
 		/**
 		 * This varaible is updated by each craft right before the array is broadcasted.
@@ -152,7 +165,7 @@ class RADIO
   struct Network_Data Network;
 
   //Used in the computation of the radio system. 
-  unsigned int start = 0;
+  unsigned long start = 0;
   
 };
 

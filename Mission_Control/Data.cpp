@@ -32,16 +32,16 @@ float DATA::Parse(char message[], int objective){
   //
   //Example Radio Transmission. 
   //
-  //                     LORA                              MISSION CONTROL             CRAFT ID
-  //  Time(ms),Altitude,Latitude,Longitude,LE, | Time(ms),Start_Stop,new_throttle, | Signal Origin
+  //                     LORA                                        MISSION CONTROL                       CRAFT ID
+  //  Time(ms),Altitude,Latitude,Longitude,LE, | Time(ms),Start_Stop,new_throttle,TargetLat,TargetLon, | Signal Origin
   //
   //Example I2C Transmission
   //
   //                                   CONTROLER ACCESS NETWORK PROTOCOL PACKET
   //  $,GPSAltitude, Latitude, Longitude, TargetLat, TargetLon, Roll, Pitch, Yaw, Speed, TargetDistance, Time,$
   //         1           2         3          4           5       6     7     8     9         10          11
+  //
   //The number of commas that the program needs to pass before it started parsing the data.
-  int goalNumber = objective;
   
   //Used to iterate through the passed in character array.
   int i = 0;
@@ -70,7 +70,7 @@ float DATA::Parse(char message[], int objective){
       commaCounter++;
     }
     //Checks to see if the desired amount of commas has been passed. 
-    else if(commaCounter == goalNumber){
+    else if(commaCounter == objective){
       
       //Checks to see if the iterator's position is a comma, used to cause a stop in parsing.
       if(message[i] != ','){
@@ -117,27 +117,29 @@ void DATA::displayInfo()
     Serial.print(  "|  Network Nodes: "); Data.printNodes();           Serial.println("\t\t\t\t\t\t\t    |");
     Serial.println("|                                                                           |");
     Serial.print(  "|  Received: ");  Serial.print(Radio.radioInput);  Serial.println("");
-    Serial.print(  "|  Sent: ");      Serial.print(Radio.radioOutput); Serial.println("");
+    Serial.print(  "|  Sent:     ");  Serial.print(Radio.radioOutput); Serial.println("");
     Serial.println("|                                                                           |");
     Serial.println("-----------------------------------------------------------------------------");
     Serial.println("|                                                                           |");
-    Serial.print(  "|  Operation Mode: ");   Serial.print(Radio.OpModeString); Serial.println("\t\t\t\t\t\t    |");
-    Serial.print(  "|  Roll Call Status: "); Serial.print(Radio.RCString);     Serial.println("\t\t\t\t\t\t    |");
+    Serial.print(  "|  Operation Mode: ");   Serial.print(Radio.getOpSTATE()); Serial.println("\t\t\t\t\t\t    |");
+    Serial.print(  "|  Roll Call Status: "); Serial.print(Radio.getRCSTATE()); Serial.println("\t\t\t\t\t\t    |");
     Serial.print(  "|  Keypad Press: ");     Serial.print(Key.pressedKey);     Serial.println("\t\t\t\t\t\t\t    |");
     Serial.println("|                                                                           |");
     Serial.println("-----------------------------------------------------------------------------");
     Serial.println("|                                                                           |");
     Serial.print(  "|  Lora Time Stamp:  "); Serial.print(Radio.Network.L_TS);  Serial.println("\t\t\t\t\t\t    |");
     Serial.print(  "|  Altitude:   "); Serial.print(Radio.Network.Altitude);    Serial.print(" m"); Serial.println("\t\t\t\t\t\t    |");
-    Serial.print(  "|  Latitude:   "); Serial.print(Radio.Network.Latitude,6);  Serial.println("\t\t\t\t\t\t    |");
-    Serial.print(  "|  Longitude:  "); Serial.print(Radio.Network.Longitude,6); Serial.println("\t\t\t\t\t\t    |");
+    Serial.print(  "|  Latitude:   "); Serial.print(Radio.Network.Latitude,5);  Serial.println("\t\t\t\t\t\t    |");
+    Serial.print(  "|  Longitude:  "); Serial.print(Radio.Network.Longitude,5); Serial.println("\t\t\t\t\t\t    |");
     Serial.print(  "|  LoRa Event: "); Serial.print(Radio.Network.LE);          Serial.println("\t\t\t\t\t\t\t    |");
     Serial.println("|                                                                           |");
     Serial.println("-----------------------------------------------------------------------------");
     Serial.println("|                                                                           |");
     Serial.print(  "|  Mission Control Time Stamp: "); Serial.print(Radio.Network.MC_TS);          Serial.println("\t\t\t\t\t    |");
-    Serial.print(  "|  Operational Status: ");         Serial.print(Radio.getSTATE());             Serial.println("\t\t\t\t\t\t    |");
+    Serial.print(  "|  Operational Status: ");         Serial.print(Radio.getFunctionalSTATE());   Serial.println("\t\t\t\t\t\t    |");
     Serial.print(  "|  Target Throttle: ");            Serial.print(Radio.Network.TargetThrottle); Serial.println("\t\t\t\t\t\t    |");
+    Serial.print(  "|  Target Lat: ");                 Serial.print(Radio.Network.TargetLon,5);    Serial.println("\t\t\t\t\t\t    |");
+    Serial.print(  "|  Target Lon: ");                 Serial.print(Radio.Network.TargetLat,5);    Serial.println("\t\t\t\t\t\t    |");
     Serial.println("|                                                                           |");
     Serial.println("-----------------------------------------------------------------------------");
     Serial.print(  "|  Received ID:  ");  Serial.print(Radio.receivedID); Serial.println("\t\t\t\t\t\t\t    |");
@@ -151,7 +153,7 @@ void DATA::displayInfo()
 
 
 /**
- * 
+ * Prints out the current array of connected nodes. 
  */
 void DATA::printNodes(){
   
@@ -166,6 +168,56 @@ void DATA::printNodes(){
   }
 }
 
+
+/**
+ * Reads in user input to set a new GPS (lat or lon) and motor throttle values.
+ */
+void DATA::newCommand(){
+  //Checks for user inputted data. 
+  if(Serial.available()){
+
+    String temp = "";
+    while(Serial.available()){
+      char t = Serial.read();
+      temp += t;
+    }
+    
+    char toParse[temp.length()];
+    temp.toCharArray(toParse,temp.length());
+
+    // EXAMPLE FORMAT FOR INPUTS
+    //
+    // Start/Stop -> $,SS,1,$
+    //
+    // New Lat/Lon -> $,GPS,#(lat),#(lon),$
+    //
+    // New Throttle -> $,T,#,$
+
+    //New info is being read in. 
+    Data.newData = Data.YES;
+    
+    //Checks for valid input format. 
+    if(temp[0] == '$' && temp[1] == ','){
+
+      //New start / stop command. 
+      if(temp[2] == 'S'){
+        Radio.Network.StartStop = Data.Parse(toParse,2);
+        Serial.println(Radio.Network.StartStop);
+      }
+      //New gps location command. 
+      else if(temp[2] == 'G'){
+        Radio.Network.TargetLat = Data.Parse(toParse,2);
+        Radio.Network.TargetLon = Data.Parse(toParse,3);
+      }
+      //New throttle command. 
+      else if(temp[2] == 'T'){
+        Radio.Network.TargetThrottle = Data.Parse(toParse,2);
+        //TEST THIS OUTPUT. DOUBLE PRINTING & THROWING OFF PACKET ORDER. 
+        // try temp middle variable for debug. 
+      }
+    }
+  }
+}
 
 
 

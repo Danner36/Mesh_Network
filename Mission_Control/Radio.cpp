@@ -54,7 +54,7 @@ float RADIO::getTargetThrottle(char buf[])
  */
 float RADIO::getCraftID(char buf[])
 {
-  return (Data.Parse(buf,8));
+  return (Data.Parse(buf,10));
 }
 
 
@@ -82,6 +82,24 @@ float RADIO::getRadioLongitude(char buf[])
 float RADIO::getLoRaEvent(char buf[])
 {
   return (Data.Parse(buf,4));
+}
+
+
+/**
+ * Parses and returns the radio transmission's longitude.
+ */
+float RADIO::getRadioTargetLat(char buf[])
+{
+  return (Data.Parse(buf,8)) / 10000.0;
+}
+
+
+/**
+ * Parses and returns the radio transmission's LoRa Event.
+ */
+float RADIO::getRadioTargetLon(char buf[])
+{
+  return (Data.Parse(buf,9)) / 10000.0;
 }
 
 
@@ -165,11 +183,9 @@ void RADIO::manager()
       
       //Updates RollCallStatus to running. 
       RCstate = RUNNING;
-      RCString = "RUNNING";
 
       //Updates overall radio state.
       OperationMode = ROLLCALL;
-      OpModeString = "ROLLCALL";
 
       //Calls function.
       Radio.rollCall();
@@ -180,11 +196,9 @@ void RADIO::manager()
       
       //Updates RollCallStatus to complete.
       RCstate = COMPLETE;
-      RCString = "COMPLETE";
 
       //Updates overall radio state to standby. Not waiting for user to send start signal. 
       OperationMode = STANDBY;
-      OpModeString = "STANDBY";
     }
 
     //This else statement appears to have duplicate code from the above if statement. 
@@ -208,7 +222,6 @@ void RADIO::manager()
 
     //Updates radio state.
     OperationMode = NORMAL;
-    OpModeString = "NORMAL";
 		
 	}
 	//Each of the 2 crafts have 5 seconds to broadcast. That means each craft will broadcast every 10 seconds.
@@ -220,13 +233,10 @@ void RADIO::manager()
 		//Sends the transmission via radio.
 		Radio.broadcast();
 
-    //Upon first switching to normal operating mode. We have to pulse the start signal (the broadcast above)
-    //   and then pulse the first packet. 
+    //Switch start signal to craft ID. Normal operations have begun. 
     if(Network.Craft_ID == 555.0){
-      delay(100);
-      Network.Craft_ID = 1.0;
-      Radio.broadcast();
-    }
+     Network.Craft_ID = 1.0;
+	  }
 	}
 }
 
@@ -363,6 +373,10 @@ void RADIO::broadcast()
   temp += ",";
   temp += Network.StartStop;
   temp += ",";
+  temp += Network.TargetLat * 10000;
+  temp += ",";
+  temp += Network.TargetLon * 10000;
+  temp += ",";
   temp += Network.TargetThrottle;
   temp += ",";
   temp += Network.Craft_ID;
@@ -405,9 +419,9 @@ void RADIO::blinkLED(){
 
 
 /**
- * Returns the operational state of the craft in string format for UI and debugging. 
+ * Returns the movement state of the craft in string format for UI and debugging. 
  */
-String RADIO::getSTATE(){
+String RADIO::getFunctionalSTATE(){
   float temp = Radio.Network.StartStop;
 
   if(temp == 0.0){
@@ -415,5 +429,43 @@ String RADIO::getSTATE(){
   }
   else if(temp == 1.0){
     return "Running";
+  }
+}
+
+/**
+ * Returns the operational state of the craft in string format for UI and debugging. 
+ */
+String RADIO::getOpSTATE(){
+  float temp = Radio.OperationMode;
+
+  if(temp == 0.0){
+    return "NONE";
+  }
+  else if(temp == 1.0){
+    return "ROLLCALL";
+  }
+  else if(temp == 2.0){
+    return "STANDBY";
+  }
+  else if(temp == 3.0){
+    return "NORMAL";
+  }
+}
+
+
+/**
+ * Returns the rollcall state of the craft in string format for UI and debugging. 
+ */
+String RADIO::getRCSTATE(){
+  float temp = Radio.RCstate;
+
+  if(temp == 0.0){
+    return "NOTSTARTED";
+  }
+  else if(temp == 1.0){
+    return "RUNNING";
+  }
+  else if(temp == 2.0){
+    return "COMPLETE";
   }
 }

@@ -43,6 +43,9 @@ void setup(){
  * MAIN PROGRAM CODE.
  */
 void loop(){
+
+  //Checks for a user inputted command. 
+  Data.newCommand();
   
   //Looks to see any keys have been pressed. Updates the variable "pressedKey" if found.
   Key.check(pad.getKey());

@@ -34,6 +34,12 @@ class RADIO
     
   //Returns the transmission's Latitude.
   float getLoRaEvent(char buf[]);
+
+  //Parses and returns the radio Target Latitude.
+  float getRadioTargetLat(char buf[]);
+
+  //Parses and returns the radio Target Latitude.
+  float getRadioTargetLon(char buf[]);
   
   //Returns the transmission's time stamp.
   float getTimeStamp(char buf[], int selector);
@@ -59,10 +65,17 @@ class RADIO
   //Compares current node against others. Prevents duplicates. 
   void nodeCheckIn();
 
+  //Returns craft movement state in string format for UI. 
+  String getFunctionalSTATE();
+
   //Returns craft operational state in string format for UI. 
-  String getSTATE();
-	
-	
+  String getOpSTATE();
+
+  //Returns craft Rollcall state in string format for UI. 
+  String getRCSTATE();
+
+
+  
   
   //Chip select pin for the radio.
   const byte RFM95_CS = 8;
@@ -91,9 +104,6 @@ class RADIO
   //State of RollCall.
   enum rollCallStatus {NOTSTARTED, RUNNING, COMPLETE};
   enum rollCallStatus RCstate = NOTSTARTED;
-
-  //Holds RCstate's (enum) text value. 
-  String RCString = "NONSTARTED";
   
   //List of nodes currently logged into network. 
   // MC - 1
@@ -106,9 +116,6 @@ class RADIO
   //   NORMAL   - Radio is running in its normal operation state. 
   enum RadioStatus {NONE, ROLLCALL, STANDBY, NORMAL};
   enum RadioStatus OperationMode = NONE;
-
-  //Holds OperationMode's (enum) text value. 
-  String OpModeString = "NOTSTARTED";
 
   //Holds the current received radio signal. 
   String radioInput = "";
@@ -144,11 +151,17 @@ class RADIO
     //   motor movement. 
     float StartStop = 0.0;
 
-    //Holds the craft's target throttle position. This is not what the craft is current at, 
-    //   but what we want the craft to have its upper limit be. For example, it will not be 
-    //   at a constant 40% if we set it to '40', but it will be able to iter up and down from
+    //User inputted target latitude for the craft. 
+    float TargetLat = 0.0;
+
+    //User inputted target longitude for the craft. 
+    float TargetLon = 0.0;
+
+    //Holds the craft's target throttle position. This is not what the craft is currently at, 
+    //   but what we want the craft's to have its upper limit be. For example, it will not be 
+    //   at a constant 40% if we set it to '40.0', but it will be able to iterate up and down from
     //   that percentage of thrust. 
-    float TargetThrottle  = 0.0;
+    float TargetThrottle = 0.0;
 		
 		/**
 		 * This varaible is updated by each craft right before the array is broadcasted.

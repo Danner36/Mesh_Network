@@ -20,6 +20,9 @@ class DATA
   //Prints nodes from Radio.nodeList.
   void printNodes();
 
+  //Reads in user input to set a new GPS (lat or lon) and motor throttle values.
+  void newCommand();
+
   
   
 	//Parses passed in message by using commas as the identifiers.
@@ -34,14 +37,6 @@ class DATA
   //   would be to use an external terminal such as Putty)
   enum dataState {NO, YES};
   enum dataState newData = YES; //Starts in Yes to the intial UI. 
-
-  //false = Direct Line of Commuication to Craft. (Eagle Eye Blimp)
-  //   true = Receiving information through another craft. Not direct from Eagle Eye.
-  //
-  //   THIS WILL NOT BE IMPLEMENTED UNTIL THIRD NODE IS BROUGHT ONLINE. PLACEHOLDER.
-  //
-  bool flyByWire = false;
-
 };
 
 #endif
