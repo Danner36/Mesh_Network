@@ -3,13 +3,11 @@
  *    development micro controller.
  */
 
-
 #include <Arduino.h>
 #include "Radio.h"
 #include "Data.h"
 #include <RH_RF95.h>
 #include "Globals.h"
-
 
 /**
  * Constructor used to reference all other variables & functions.
@@ -26,6 +24,45 @@ RADIO::RADIO()
 float RADIO::getRadioAltitude(char buf[])
 {
 	return (Data.Parse(buf,1));
+}
+
+
+/**
+ * Parses and returns the radio transmission's latitude.
+ */
+float RADIO::getRadioLatitude(char buf[])
+{
+  return (Data.Parse(buf,2)) / 10000.0;
+}
+
+
+/**
+ * Parses and returns the radio transmission's longitude.
+ */
+float RADIO::getRadioLongitude(char buf[])
+{
+  return (Data.Parse(buf,3)) / 10000.0;
+}
+
+
+/**
+ * Parses and returns the radio transmission's LoRa Event.
+ */
+float RADIO::getLoRaEvent(char buf[])
+{
+  return (Data.Parse(buf,4));
+}
+
+
+
+/**
+ * Parses and returns the radio transmission's Time Stamp (ms).
+ *    LoRa  -> 0
+ *    MC    -> 5
+ */
+float RADIO::getTimeStamp(char buf[], int selector)
+{
+  return (Data.Parse(buf, selector));
 }
 
 
@@ -50,41 +87,6 @@ float RADIO::getTargetThrottle(char buf[])
 
 
 /**
- * Parses and returns the radio transmission's Craft ID.
- */
-float RADIO::getCraftID(char buf[])
-{
-	return (Data.Parse(buf,10));
-}
-
-
-/**
- * Parses and returns the radio transmission's latitude.
- */
-float RADIO::getRadioLatitude(char buf[])
-{
-  return (Data.Parse(buf,2)) / 10000.0;
-}
-
-
-/**
- * Parses and returns the radio transmission's longitude.
- */
-float RADIO::getRadioLongitude(char buf[])
-{
-  return (Data.Parse(buf,3)) / 10000.0;
-}
-
-/**
- * Parses and returns the radio transmission's LoRa Event.
- */
-float RADIO::getLoRaEvent(char buf[])
-{
-	return (Data.Parse(buf,4));
-}
-
-
-/**
  * Parses and returns the radio Target Latitude.
  */
 float RADIO::getRadioTargetLat(char buf[])
@@ -103,13 +105,11 @@ float RADIO::getRadioTargetLon(char buf[])
 
 
 /**
- * Parses and returns the radio transmission's Time Stamp (ms).
- *    LoRa  -> 0
- *    MC    -> 5
+ * Parses and returns the radio transmission's Craft ID.
  */
-float RADIO::getTimeStamp(char buf[], int selector)
+float RADIO::getCraftID(char buf[])
 {
-	return (Data.Parse(buf, selector));
+	return (Data.Parse(buf,10));
 }
 
 

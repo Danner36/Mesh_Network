@@ -30,35 +30,6 @@ float RADIO::getRadioAltitude(char buf[])
 
 
 /**
- * Parses and returns the radio transmission's Start or Stop variable.
- * 0.0 -> pause
- * 1.0 -> running
- */
-float RADIO::getStartStop(char buf[])
-{
-  return (Data.Parse(buf,6));
-}
-
-
-/**
- * Parses and returns the radio transmission's targetThrottle
- */
-float RADIO::getTargetThrottle(char buf[])
-{
-  return (Data.Parse(buf,7));
-}
-
-
-/**
- * Parses and returns the radio transmission's Craft ID.
- */
-float RADIO::getCraftID(char buf[])
-{
-  return (Data.Parse(buf,10));
-}
-
-
-/**
  * Parses and returns the radio transmission's latitude.
  */
 float RADIO::getRadioLatitude(char buf[])
@@ -85,23 +56,6 @@ float RADIO::getLoRaEvent(char buf[])
 }
 
 
-/**
- * Parses and returns the radio transmission's longitude.
- */
-float RADIO::getRadioTargetLat(char buf[])
-{
-  return (Data.Parse(buf,8)) / 10000.0;
-}
-
-
-/**
- * Parses and returns the radio transmission's LoRa Event.
- */
-float RADIO::getRadioTargetLon(char buf[])
-{
-  return (Data.Parse(buf,9)) / 10000.0;
-}
-
 
 /**
  * Parses and returns the radio transmission's Time Stamp (ms).
@@ -111,6 +65,53 @@ float RADIO::getRadioTargetLon(char buf[])
 float RADIO::getTimeStamp(char buf[], int selector)
 {
   return (Data.Parse(buf, selector));
+}
+
+
+/**
+ * Parses and returns the radio transmission's Start or Stop variable.
+ * 0.0 -> pause
+ * 1.0 -> running
+ */
+float RADIO::getStartStop(char buf[])
+{
+  return (Data.Parse(buf,6));
+}
+
+
+/**
+ * Parses and returns the radio transmission's targetThrottle
+ */
+float RADIO::getTargetThrottle(char buf[])
+{
+  return (Data.Parse(buf,7));
+}
+
+
+/**
+ * Parses and returns the radio Target Latitude.
+ */
+float RADIO::getRadioTargetLat(char buf[])
+{
+  return (Data.Parse(buf,8)) / 10000.0;
+}
+
+
+/**
+ * Parses and returns the radio Target Longitude.
+ */
+float RADIO::getRadioTargetLon(char buf[])
+{
+  return (Data.Parse(buf,9)) / 10000.0;
+}
+
+
+/**
+ * Parses and returns the radio transmission's Craft ID.
+ */
+float RADIO::getCraftID(char buf[])
+{
+  return (Data.Parse(buf,10));
 }
 
 
