@@ -11,26 +11,26 @@ class KEYPAD
 {
   public:
 
-  //Constructor
+  // Constructor
   KEYPAD();
 
-  //Checks for new key press. Records its value. 
+  // Checks for new key press. Records its value. 
   void check(char temp);
 
-  //Converts char key to its button integer on the keypad. 
+  // Converts char key to its button integer on the keypad. 
   int convertCharToInt(char key);
 
 
-  //Current key being pressed down. If none, than = 0.
+  // Current key being pressed down. If none, than = 0.
   int pressedKey;
 
-  //Wires that represent each row.  
+  // Wires that represent each row.  
   byte rowPins[3] = {5, 6, 9};
 
-  //Wires that represent each column.
+  // Wires that represent each column.
   byte colPins[3] = {11, 12, 13};
   
-  //Matrix layout of the keypad in use. 
+  // Matrix layout of the keypad in use. 
   char keys[3][3] ={
                     {'1','2','3'},
                     {'4','5','6'},
